@@ -21,10 +21,8 @@ import pandas as pd
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import Dataset, DataLoader
-
 from baseline_model import GuildOracle, count_parameters
-
+from torch.utils.data import DataLoader, Dataset
 
 # ============================================================================
 # Dataset PyTorch

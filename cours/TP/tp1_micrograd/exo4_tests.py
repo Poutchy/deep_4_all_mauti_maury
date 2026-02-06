@@ -36,7 +36,7 @@ from sklearn.datasets import make_moons
 
 
 def hinge_loss(y, y_preds):
-    return [(Value(1) - Value(float(y[i])) * y_preds[i]).relu() for i in range(len(y))]
+    return [(Value(1) - Value(float(y[i])) * y_preds[i]).sigmoid() for i in range(len(y))]
 
 
 # =============================================================================
@@ -139,5 +139,5 @@ plt.scatter(X[:, 0], X[:, 1], c=y, s=40, cmap=plt.cm.Spectral, edgecolors='black
 plt.title(f"Frontiere de decision (Micrograd)\nLoss: {total_loss.data:.4f}, Acc: {acc * 100:.1f}%")
 plt.xlabel("x1")
 plt.ylabel("x2")
-plt.savefig("decision_boundary.png")
+plt.savefig("decision_boundary_sig.png")
 print("Graphique sauvegarde sous 'decision_boundary.png'")

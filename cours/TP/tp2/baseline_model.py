@@ -12,7 +12,6 @@ Contient:
 import torch
 import torch.nn as nn
 
-
 # ============================================================================
 # TP2 : Modèle MLP pour stats d'aventuriers
 # ============================================================================
@@ -33,8 +32,54 @@ class GuildOracle(nn.Module):
             num_layers: Nombre de couches cachées
         """
         super().__init__()
-        # TODO
-        self.network = nn.Sequential()
+        # feature_weights = torch.tensor([
+        #     0.175,   # Force - La puissance
+        #     0.25,   # Intelligence - La sagesse
+        #     0.15,   # Agilité - L'esquive
+        #     0.125,   # Chance - Le destin
+        #     0.10,   # Expérience - Le vécu
+        #     -0.09,   # Difficulté - Le danger (malus)
+        #     0.20,   # Équipement - Crucial !
+        #     -0.125,  # Fatigue - L'épuisement (malus)
+        # ], dtype=torch.float32)
+        # feature_weights = feature_weights / feature_weights.abs().max()
+        # self.register_buffer("feature_weights", feature_weights)
+
+        dropout_p = min(0.1 + 0.05 * num_layers, 0.5)
+        activation = nn.ReLU() if num_layers <= 3 else nn.LeakyReLU(0.1)
+
+        dims = [
+            int(max(hidden_dim // (2 ** i), 8))
+            for i in range(num_layers)
+        ]
+
+        layers = [
+            nn.Linear(input_dim, dims[0]),
+            # nn.BatchNorm1d(dims[0]),
+            activation
+        ]
+
+        for i in range(num_layers - 1):
+            layers.append(nn.Linear(dims[i], dims[i + 1]))
+            layers.append(nn.BatchNorm1d(dims[i + 1]))
+            layers.append(activation)
+            # layers.append(nn.Dropout(dropout_p))
+            if i % 2:
+                layers.append(nn.Dropout(dropout_p))
+
+        layers.append(nn.Linear(dims[-1], 1))
+        self.network = nn.Sequential(*layers)
+        # self.network = nn.Sequential(
+        #     nn.Linear(input_dim, hidden_dim),
+        #     nn.LeakyReLU(0.1),
+        #     nn.Dropout(0.3),
+
+        #     nn.Linear(hidden_dim, hidden_dim),
+        #     nn.LeakyReLU(0.1),
+        #     nn.Dropout(0.3),
+
+        #     nn.Linear(hidden_dim, 1)
+        # )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -46,6 +91,9 @@ class GuildOracle(nn.Module):
         Returns:
             Logits de shape (batch_size, 1)
         """
+        # x_weighted = x * self.feature_weights
+        # return self.network(x_weighted)
+        # x = x * self.feature_weights
         return self.network(x)
 
     def predict_proba(self, x: torch.Tensor) -> torch.Tensor:
