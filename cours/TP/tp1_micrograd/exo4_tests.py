@@ -36,7 +36,9 @@ from sklearn.datasets import make_moons
 
 
 def hinge_loss(y, y_preds):
-    return [(Value(1) - Value(float(y[i])) * y_preds[i]).sigmoid() for i in range(len(y))]
+    return [
+        (Value(1) - Value(float(y[i])) * y_preds[i]).sigmoid() for i in range(len(y))
+    ]
 
 
 # =============================================================================
@@ -113,7 +115,9 @@ for k in range(epochs):
         p.data -= eta * p.grad
 
     if k % 10 == 0:
-        print(f"Etape {k:3d} | Loss: {total_loss.data:.4f} | Precision: {acc * 100:.1f}% | LR: {eta:.4f}")
+        print(
+            f"Etape {k:3d} | Loss: {total_loss.data:.4f} | Precision: {acc * 100:.1f}% | LR: {eta:.4f}"
+        )
 
 # Fin de l'entrainement
 print(f"\nFIN. Loss finale : {total_loss.data:.4f}, Precision : {acc * 100:.1f}%")
@@ -135,8 +139,10 @@ Z = Z.reshape(xx.shape)
 
 plt.figure(figsize=(8, 6))
 plt.contourf(xx, yy, Z, cmap=plt.cm.Spectral, alpha=0.8)
-plt.scatter(X[:, 0], X[:, 1], c=y, s=40, cmap=plt.cm.Spectral, edgecolors='black')
-plt.title(f"Frontiere de decision (Micrograd)\nLoss: {total_loss.data:.4f}, Acc: {acc * 100:.1f}%")
+plt.scatter(X[:, 0], X[:, 1], c=y, s=40, cmap=plt.cm.Spectral, edgecolors="black")
+plt.title(
+    f"Frontiere de decision (Micrograd)\nLoss: {total_loss.data:.4f}, Acc: {acc * 100:.1f}%"
+)
 plt.xlabel("x1")
 plt.ylabel("x2")
 plt.savefig("decision_boundary_sig.png")

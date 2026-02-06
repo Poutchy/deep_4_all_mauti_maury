@@ -7,12 +7,14 @@ app = marimo.App(width="medium")
 @app.cell
 def _():
     import marimo as mo
+
     return (mo,)
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""
+    mo.md(
+        r"""
     # Reseaux de Neurones : De la Theorie a la Pratique
 
     ## Master 2 Informatique - Introduction a l'IA
@@ -27,13 +29,15 @@ def _(mo):
     4. **Backpropagation** - La regle de la chaine en action
     5. **Multi-Layer Perceptron (MLP)** - Architecture profonde
     6. **Demo Interactive** - Micrograd en pratique
-    """)
+    """
+    )
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""
+    mo.md(
+        r"""
     ---
     ## 1. Le Neurone Artificiel
 
@@ -42,13 +46,15 @@ def _(mo):
     Le neurone biologique recoit des signaux electriques via ses **dendrites**,
     les integre dans le **corps cellulaire**, et si le signal depasse un seuil,
     transmet une impulsion via son **axone**.
-    """)
+    """
+    )
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""
+    mo.md(
+        r"""
     ### Le modele mathematique
 
     Le neurone artificiel (perceptron) imite ce comportement :
@@ -61,19 +67,22 @@ def _(mo):
     - $b$ : biais (seuil d'activation)
     - $f$ : fonction d'activation (decision de "tirer" ou non)
     - $y$ : sortie du neurone
-    """)
+    """
+    )
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""
+    mo.md(
+        r"""
     ### 🕹️ Labo Interactif : La Frontière de Décision
 
     Jouez avec les paramètres pour comprendre leur rôle géométrique :
     - **$w_1$ et $w_2$** : Ils déterminent l'**angle** (la rotation) de la ligne.
     - **$b$ (Biais)** : Il détermine la **position** (le décalage) de la ligne par rapport à l'origine.
-    """)
+    """
+    )
     return
 
 
@@ -91,8 +100,22 @@ def _(mo):
         class_1 = np.random.randn(50, 2) + np.array([-2, -2])
 
         # Affichage des points
-        ax.scatter(class_0[:, 0], class_0[:, 1], c='blue', label='Classe 0', alpha=0.7, edgecolors='k')
-        ax.scatter(class_1[:, 0], class_1[:, 1], c='red', label='Classe 1', alpha=0.7, edgecolors='k')
+        ax.scatter(
+            class_0[:, 0],
+            class_0[:, 1],
+            c="blue",
+            label="Classe 0",
+            alpha=0.7,
+            edgecolors="k",
+        )
+        ax.scatter(
+            class_1[:, 0],
+            class_1[:, 1],
+            c="red",
+            label="Classe 1",
+            alpha=0.7,
+            edgecolors="k",
+        )
 
         # --- Calcul de la Frontière de décision ---
         # Equation : w1*x1 + w2*x2 + b = 0
@@ -102,50 +125,58 @@ def _(mo):
 
         if w2 != 0:
             y_line = -(w1 * x_line + b) / w2
-            label = f'{w1} $x_1$ + {w2} $x_2$ + {b} = 0'
-            ax.plot(x_line, y_line, 'g-', linewidth=3, label=label)
+            label = f"{w1} $x_1$ + {w2} $x_2$ + {b} = 0"
+            ax.plot(x_line, y_line, "g-", linewidth=3, label=label)
 
             # Coloration des zones (fond)
             # Pour visualiser la zone "Classe 0" vs "Classe 1"
             y_min, y_max = -6, 6
-            ax.fill_between(x_line, y_line, y_max if w2 > 0 else y_min, color='blue', alpha=0.1)
-            ax.fill_between(x_line, y_line, y_min if w2 > 0 else y_max, color='red', alpha=0.1)
+            ax.fill_between(
+                x_line, y_line, y_max if w2 > 0 else y_min, color="blue", alpha=0.1
+            )
+            ax.fill_between(
+                x_line, y_line, y_min if w2 > 0 else y_max, color="red", alpha=0.1
+            )
 
         else:
             # Cas particulier ligne verticale (w2 = 0)
             x_vert = -b / w1 if w1 != 0 else 0
-            ax.axvline(x=x_vert, color='g', linewidth=3, label=f'Frontière Verticale ($x_1$={x_vert:.2f})')
+            ax.axvline(
+                x=x_vert,
+                color="g",
+                linewidth=3,
+                label=f"Frontière Verticale ($x_1$={x_vert:.2f})",
+            )
 
         # Paramètres graphiques
         ax.set_xlim(-5, 5)
         ax.set_ylim(-5, 5)
-        ax.set_xlabel('$x_1$ (Entrée 1)')
-        ax.set_ylabel('$x_2$ (Entrée 2)')
-        ax.legend(loc='upper right')
-        ax.set_title(f'Visualisation : $w_1={w1}, w_2={w2}, b={b}$')
-        ax.grid(True, alpha=0.3, linestyle='--')
+        ax.set_xlabel("$x_1$ (Entrée 1)")
+        ax.set_ylabel("$x_2$ (Entrée 2)")
+        ax.legend(loc="upper right")
+        ax.set_title(f"Visualisation : $w_1={w1}, w_2={w2}, b={b}$")
+        ax.grid(True, alpha=0.3, linestyle="--")
 
         plt.tight_layout()
         return fig
 
     # Création des sliders
-    w1_slider = mo.ui.slider(start=-5.0, stop=5.0, step=0.1, value=1.0, label="Poids w1")
-    w2_slider = mo.ui.slider(start=-5.0, stop=5.0, step=0.1, value=1.0, label="Poids w2")
-    b_slider = mo.ui.slider(start=-10.0, stop=10.0, step=0.5, value=0.0, label="Biais b")
+    w1_slider = mo.ui.slider(
+        start=-5.0, stop=5.0, step=0.1, value=1.0, label="Poids w1"
+    )
+    w2_slider = mo.ui.slider(
+        start=-5.0, stop=5.0, step=0.1, value=1.0, label="Poids w2"
+    )
+    b_slider = mo.ui.slider(
+        start=-10.0, stop=10.0, step=0.5, value=0.0, label="Biais b"
+    )
     return b_slider, np, plot_interactive_neuron, plt, w1_slider, w2_slider
 
 
 @app.cell
 def _(b_slider, mo, w1_slider, w2_slider):
     # Affichage groupé
-    mo.vstack(
-            [
-                mo.md("**Paramètres du Neurone**"),
-                w1_slider,
-                w2_slider,
-                b_slider
-                ]
-            )
+    mo.vstack([mo.md("**Paramètres du Neurone**"), w1_slider, w2_slider, b_slider])
     return
 
 
@@ -158,7 +189,8 @@ def _(b_slider, plot_interactive_neuron, w1_slider, w2_slider):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""
+    mo.md(
+        r"""
     ---
     ## 2. Fonctions d'Activation
 
@@ -170,7 +202,8 @@ def _(mo):
     $$f(g(x)) = W_2(W_1 x) = (W_2 W_1) x = W' x$$
 
     La non-linearite permet d'apprendre des frontieres de decision complexes !
-    """)
+    """
+    )
     return
 
 
@@ -182,47 +215,49 @@ def _(mo, np, plt):
 
         # Sigmoid
         sigmoid = 1 / (1 + np.exp(-x))
-        axes[0, 0].plot(x, sigmoid, 'b-', linewidth=2)
-        axes[0, 0].set_title('Sigmoid: $\\sigma(x) = \\frac{1}{1+e^{-x}}$')
-        axes[0, 0].axhline(y=0, color='k', linestyle='-', linewidth=0.5)
-        axes[0, 0].axvline(x=0, color='k', linestyle='-', linewidth=0.5)
+        axes[0, 0].plot(x, sigmoid, "b-", linewidth=2)
+        axes[0, 0].set_title("Sigmoid: $\\sigma(x) = \\frac{1}{1+e^{-x}}$")
+        axes[0, 0].axhline(y=0, color="k", linestyle="-", linewidth=0.5)
+        axes[0, 0].axvline(x=0, color="k", linestyle="-", linewidth=0.5)
         axes[0, 0].grid(True, alpha=0.3)
 
         # Tanh
         tanh = np.tanh(x)
-        axes[0, 1].plot(x, tanh, 'g-', linewidth=2)
-        axes[0, 1].set_title('Tanh: $\\tanh(x) = \\frac{e^x - e^{-x}}{e^x + e^{-x}}$')
-        axes[0, 1].axhline(y=0, color='k', linestyle='-', linewidth=0.5)
-        axes[0, 1].axvline(x=0, color='k', linestyle='-', linewidth=0.5)
+        axes[0, 1].plot(x, tanh, "g-", linewidth=2)
+        axes[0, 1].set_title("Tanh: $\\tanh(x) = \\frac{e^x - e^{-x}}{e^x + e^{-x}}$")
+        axes[0, 1].axhline(y=0, color="k", linestyle="-", linewidth=0.5)
+        axes[0, 1].axvline(x=0, color="k", linestyle="-", linewidth=0.5)
         axes[0, 1].grid(True, alpha=0.3)
 
         # ReLU
         relu = np.maximum(0, x)
-        axes[0, 2].plot(x, relu, 'r-', linewidth=2)
-        axes[0, 2].set_title('ReLU: $\\max(0, x)$')
-        axes[0, 2].axhline(y=0, color='k', linestyle='-', linewidth=0.5)
-        axes[0, 2].axvline(x=0, color='k', linestyle='-', linewidth=0.5)
+        axes[0, 2].plot(x, relu, "r-", linewidth=2)
+        axes[0, 2].set_title("ReLU: $\\max(0, x)$")
+        axes[0, 2].axhline(y=0, color="k", linestyle="-", linewidth=0.5)
+        axes[0, 2].axvline(x=0, color="k", linestyle="-", linewidth=0.5)
         axes[0, 2].grid(True, alpha=0.3)
 
         # Derivees
         sigmoid_grad = sigmoid * (1 - sigmoid)
-        axes[1, 0].plot(x, sigmoid_grad, 'b--', linewidth=2)
-        axes[1, 0].set_title("Derivee Sigmoid: $\\sigma'(x) = \\sigma(x)(1-\\sigma(x))$")
-        axes[1, 0].axhline(y=0, color='k', linestyle='-', linewidth=0.5)
+        axes[1, 0].plot(x, sigmoid_grad, "b--", linewidth=2)
+        axes[1, 0].set_title(
+            "Derivee Sigmoid: $\\sigma'(x) = \\sigma(x)(1-\\sigma(x))$"
+        )
+        axes[1, 0].axhline(y=0, color="k", linestyle="-", linewidth=0.5)
         axes[1, 0].grid(True, alpha=0.3)
         axes[1, 0].set_ylim(-0.1, 0.5)
 
-        tanh_grad = 1 - tanh ** 2
-        axes[1, 1].plot(x, tanh_grad, 'g--', linewidth=2)
+        tanh_grad = 1 - tanh**2
+        axes[1, 1].plot(x, tanh_grad, "g--", linewidth=2)
         axes[1, 1].set_title("Derivee Tanh: $1 - \\tanh^2(x)$")
-        axes[1, 1].axhline(y=0, color='k', linestyle='-', linewidth=0.5)
+        axes[1, 1].axhline(y=0, color="k", linestyle="-", linewidth=0.5)
         axes[1, 1].grid(True, alpha=0.3)
 
         relu_grad = (x > 0).astype(float)
-        axes[1, 2].plot(x, relu_grad, 'r--', linewidth=2)
+        axes[1, 2].plot(x, relu_grad, "r--", linewidth=2)
         axes[1, 2].set_title("Derivee ReLU: $\\mathbb{1}_{x>0}$")
-        axes[1, 2].axhline(y=0, color='k', linestyle='-', linewidth=0.5)
-        axes[1, 2].axvline(x=0, color='k', linestyle='-', linewidth=0.5)
+        axes[1, 2].axhline(y=0, color="k", linestyle="-", linewidth=0.5)
+        axes[1, 2].axvline(x=0, color="k", linestyle="-", linewidth=0.5)
         axes[1, 2].grid(True, alpha=0.3)
         axes[1, 2].set_ylim(-0.1, 1.5)
 
@@ -241,7 +276,8 @@ def _(plot_activations):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""
+    mo.md(
+        r"""
     ### Comparaison des fonctions d'activation
 
     | Fonction | Avantages | Inconvenients |
@@ -251,13 +287,15 @@ def _(mo):
     | **ReLU** | Simple, pas de vanishing gradient | "Dying ReLU" (neurones morts) |
     | **Leaky ReLU** | Evite les neurones morts | Hyperparametre supplementaire |
     | **GELU/SiLU** | Smooth, performant en pratique | Plus couteux a calculer |
-    """)
+    """
+    )
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""
+    mo.md(
+        r"""
     ---
     ## 3. Descente de Gradient
 
@@ -270,13 +308,15 @@ def _(mo):
     **Idee intuitive** : Imaginez-vous sur une montagne dans le brouillard.
     Pour descendre, vous tatez le sol autour de vous et avancez dans la direction
     qui descend le plus.
-    """)
+    """
+    )
     return
 
 
 @app.cell
 def _(mo):
-    mo.md(r"""
+    mo.md(
+        r"""
     ### 📉 L'algorithme de Descente de Gradient
 
     L'objectif est de minimiser la fonction de coût $\mathcal{L}(\mathbf{w})$.
@@ -298,7 +338,8 @@ def _(mo):
     | $\mathcal{L}$ | **Fonction de coût** | (*Loss function*) Mesure l'erreur entre la prédiction et la réalité. |
     | $\nabla$ | **Gradient** | Vecteur indiquant la direction de la pente la plus raide. |
     | $\partial$ | **Dérivée partielle** | Variation de l'erreur par rapport à un seul poids spécifique. |
-    """)
+    """
+    )
     return
 
 
@@ -315,12 +356,15 @@ def _(mo, np, plt):
         # On utilise L(w) = w^2, une parabole avec minimum en w=0
         # C'est une simplification pedagogique (en vrai : MSE, Cross-Entropy...)
         w_values = np.linspace(-3, 3, 100)
-        loss_values = w_values ** 2  # Loss = w^2
+        loss_values = w_values**2  # Loss = w^2
 
         axes[0].plot(
-                w_values, loss_values, 'b-', linewidth=2,
-                label='$\\mathcal{L}(w) = w^2$ (fonction de perte)'
-                )
+            w_values,
+            loss_values,
+            "b-",
+            linewidth=2,
+            label="$\\mathcal{L}(w) = w^2$ (fonction de perte)",
+        )
 
         # --- ETAPE 2 : Initialiser les hyperparametres ---
         learning_rate = 0.3  # eta : pas d'apprentissage
@@ -342,24 +386,28 @@ def _(mo, np, plt):
             weights_history.append(w_new)
 
         # Calculer la loss pour chaque poids visite
-        loss_history = [w ** 2 for w in weights_history]
+        loss_history = [w**2 for w in weights_history]
 
         # Afficher la trajectoire
         axes[0].plot(
-                weights_history, loss_history, 'ro-', markersize=8,
-                label=f'Trajectoire GD ($\\eta={learning_rate}$)'
-                )
+            weights_history,
+            loss_history,
+            "ro-",
+            markersize=8,
+            label=f"Trajectoire GD ($\\eta={learning_rate}$)",
+        )
 
         for i in range(len(weights_history) - 1):
             axes[0].annotate(
-                    '', xy=(weights_history[i + 1], loss_history[i + 1]),
-                    xytext=(weights_history[i], loss_history[i]),
-                    arrowprops=dict(arrowstyle='->', color='red', lw=1.5)
-                    )
+                "",
+                xy=(weights_history[i + 1], loss_history[i + 1]),
+                xytext=(weights_history[i], loss_history[i]),
+                arrowprops=dict(arrowstyle="->", color="red", lw=1.5),
+            )
 
-        axes[0].set_xlabel('Poids $w$')
-        axes[0].set_ylabel('Perte $\\mathcal{L}(w)$')
-        axes[0].set_title('Descente de gradient 1D : minimiser la perte')
+        axes[0].set_xlabel("Poids $w$")
+        axes[0].set_ylabel("Perte $\\mathcal{L}(w)$")
+        axes[0].set_title("Descente de gradient 1D : minimiser la perte")
         axes[0].legend()
         axes[0].grid(True, alpha=0.3)
 
@@ -367,12 +415,12 @@ def _(mo, np, plt):
         w1 = np.linspace(-3, 3, 100)
         w2 = np.linspace(-3, 3, 100)
         W1, W2 = np.meshgrid(w1, w2)
-        L_2d = W1 ** 2 + 2 * W2 ** 2
+        L_2d = W1**2 + 2 * W2**2
 
         # W1 position X, W2 position Y
-        axes[1].contour(W1, W2, L_2d, levels=20, cmap='viridis')
-        axes[1].set_xlabel('Poids $w_1$')
-        axes[1].set_ylabel('Poids $w_2$')
+        axes[1].contour(W1, W2, L_2d, levels=20, cmap="viridis")
+        axes[1].set_xlabel("Poids $w_1$")
+        axes[1].set_ylabel("Poids $w_2$")
 
         # Trajectoire 2D
         lr = 0.2
@@ -382,9 +430,13 @@ def _(mo, np, plt):
             pos.append(pos[-1] - lr * grad)
 
         pos = np.array(pos)
-        axes[1].plot(pos[:, 0], pos[:, 1], 'ro-', markersize=6, label=f'GD ($\\eta={lr}$)')
-        axes[1].scatter([0], [0], c='green', s=100, marker='*', label='Minimum global')
-        axes[1].set_title('Descente de gradient 2D : $\\mathcal{L}(w_1, w_2) = w_1^2 + 2w_2^2$')
+        axes[1].plot(
+            pos[:, 0], pos[:, 1], "ro-", markersize=6, label=f"GD ($\\eta={lr}$)"
+        )
+        axes[1].scatter([0], [0], c="green", s=100, marker="*", label="Minimum global")
+        axes[1].set_title(
+            "Descente de gradient 2D : $\\mathcal{L}(w_1, w_2) = w_1^2 + 2w_2^2$"
+        )
         axes[1].legend()
 
         plt.tight_layout()
@@ -402,7 +454,8 @@ def _(plot_gradient_descent):
 
 @app.cell
 def _(mo):
-    mo.md(r"""
+    mo.md(
+        r"""
     ### 🕹️ Labo Interactif : Jouez avec le Learning Rate !
 
     Essayez de modifier le **taux d'apprentissage** ($\eta$) ci-dessous.
@@ -410,15 +463,20 @@ def _(mo):
     - **$\eta \approx 0.3$** : Convergence rapide.
     - **$\eta > 0.9$** : Oscillations.
     - **$\eta > 1.0$** : Explosion (Divergence) !
-    """)
+    """
+    )
     return
 
 
 @app.cell
 def _(mo):
     # Les Widgets
-    lr_slider = mo.ui.slider(start=0.01, stop=1.2, step=0.01, value=0.1, label="Learning Rate (η)")
-    step_slider = mo.ui.slider(start=1, stop=50, step=1, value=10, label="Nombre de pas")
+    lr_slider = mo.ui.slider(
+        start=0.01, stop=1.2, step=0.01, value=0.1, label="Learning Rate (η)"
+    )
+    step_slider = mo.ui.slider(
+        start=1, stop=50, step=1, value=10, label="Nombre de pas"
+    )
 
     # On regroupe pour l'affichage
     mo.hstack([lr_slider, step_slider], justify="center")
@@ -433,8 +491,8 @@ def _(lr_slider, mo, np, plt, step_slider):
 
         # Fonction L(w) = w^2
         w_range = np.linspace(-3, 3, 200)
-        loss = w_range ** 2
-        ax.plot(w_range, loss, 'b-', alpha=0.3, label='Perte $\mathcal{L}(w) = w^2$')
+        loss = w_range**2
+        ax.plot(w_range, loss, "b-", alpha=0.3, label="Perte $\mathcal{L}(w) = w^2$")
 
         # Simulation
         w = 2.5  # Point de départ fixe pour bien comparer
@@ -448,18 +506,20 @@ def _(lr_slider, mo, np, plt, step_slider):
                 break
 
         path = np.array(path)
-        loss_path = path ** 2
+        loss_path = path**2
 
         # Dessin
-        ax.plot(path, loss_path, 'ro-', label=f'Trajectoire ($\eta={lr}$)')
+        ax.plot(path, loss_path, "ro-", label=f"Trajectoire ($\eta={lr}$)")
 
         # Flèches
         for i in range(len(path) - 1):
             if abs(path[i]) < 4 and abs(path[i + 1]) < 4:  # Garder propre
                 ax.annotate(
-                        '', xy=(path[i + 1], loss_path[i + 1]), xytext=(path[i], loss_path[i]),
-                        arrowprops=dict(arrowstyle='->', color='red', lw=1.5)
-                        )
+                    "",
+                    xy=(path[i + 1], loss_path[i + 1]),
+                    xytext=(path[i], loss_path[i]),
+                    arrowprops=dict(arrowstyle="->", color="red", lw=1.5),
+                )
 
         ax.set_title(f"Descente de Gradient : {len(path) - 1} itérations")
         ax.set_ylim(-0.5, 10)
@@ -471,17 +531,18 @@ def _(lr_slider, mo, np, plt, step_slider):
 
     # Appel réactif
     mo.vstack(
-            [
-                mo.md(f"**Taux d'apprentissage actuel : {lr_slider.value}**"),
-                interact_gradient_descent(lr_slider.value, step_slider.value)
-                ]
-            )
+        [
+            mo.md(f"**Taux d'apprentissage actuel : {lr_slider.value}**"),
+            interact_gradient_descent(lr_slider.value, step_slider.value),
+        ]
+    )
     return
 
 
 @app.cell
 def _(mo):
-    mo.md(r"""
+    mo.md(
+        r"""
     ---
     ## 4. 🧠 Backpropagation : La Règle de la Chaîne
 
@@ -564,13 +625,15 @@ def _(mo):
     | ReLU avec entrée < 0 | $0$ | Gradient bloqué ("neurone mort") |
     | Sigmoid saturée (entrée très grande) | $\approx 0$ | Gradient qui s'évanouit |
     | Connexion résiduelle ($y = x + f(x)$) | $1 + f'(x)$ | Gradient préservé (au moins 1) |
-    """)
+    """
+    )
     return
 
 
 @app.cell
 def _(mo):
-    mo.md(r"""
+    mo.md(
+        r"""
     ### 🔍 Backpropagation en Action
 
     Prenons un exemple concret : $L = (w \cdot x - y)^2$
@@ -665,7 +728,8 @@ def _(mo):
     **Mise à jour du poids :** $w_{\text{nouveau}} = w - \eta \cdot \frac{\partial L}{\partial w}$
 
     où $\eta$ est le *learning rate* (taux d'apprentissage).
-    """)
+    """
+    )
     return
 
 
@@ -675,28 +739,31 @@ def _(mo, plt):
         fig, ax = plt.subplots(figsize=(14, 7))
         ax.set_xlim(0, 10)
         ax.set_ylim(0, 5)
-        ax.axis('off')
+        ax.axis("off")
 
         # Définition des positions
         nodes = {
-            'x':  (1, 3.5), 'w': (1, 1.5),  # Entrées
-            '*':  (3, 2.5),  # Opération z
-            '-':  (5, 2.5),  # Opération a (avec y implicite pour simplifier)
-            '^2': (7, 2.5),  # Opération L
-            'L':  (9, 2.5)  # Sortie
-            }
+            "x": (1, 3.5),
+            "w": (1, 1.5),  # Entrées
+            "*": (3, 2.5),  # Opération z
+            "-": (5, 2.5),  # Opération a (avec y implicite pour simplifier)
+            "^2": (7, 2.5),  # Opération L
+            "L": (9, 2.5),  # Sortie
+        }
 
         # --- DESSIN DU FORWARD (Bleu) ---
-        arrows_fwd = [('x', '*'), ('w', '*'), ('*', '-'), ('-', '^2'), ('^2', 'L')]
+        arrows_fwd = [("x", "*"), ("w", "*"), ("*", "-"), ("-", "^2"), ("^2", "L")]
 
         for start, end in arrows_fwd:
             x1, y1 = nodes[start]
             x2, y2 = nodes[end]
             # Décalage léger vers le haut pour les flèches bleues
             ax.annotate(
-                    '', xy=(x2 - 0.3, y2 + 0.1), xytext=(x1 + 0.3, y1 + 0.1),
-                    arrowprops=dict(arrowstyle='->', color='#3498db', lw=2)
-                    )
+                "",
+                xy=(x2 - 0.3, y2 + 0.1),
+                xytext=(x1 + 0.3, y1 + 0.1),
+                arrowprops=dict(arrowstyle="->", color="#3498db", lw=2),
+            )
 
         # --- DESSIN DU BACKWARD (Rouge) ---
         # On inverse les flèches
@@ -706,40 +773,78 @@ def _(mo, plt):
 
             # Courbure (connectionstyle) pour séparer visuellement le retour
             ax.annotate(
-                    '', xy=(x2 + 0.3, y2 - 0.1), xytext=(x1 - 0.3, y1 - 0.1),
-                    arrowprops=dict(arrowstyle='->', color='#e74c3c', lw=2, ls='--')
-                    )
+                "",
+                xy=(x2 + 0.3, y2 - 0.1),
+                xytext=(x1 - 0.3, y1 - 0.1),
+                arrowprops=dict(arrowstyle="->", color="#e74c3c", lw=2, ls="--"),
+            )
 
         # --- NOEUDS ---
         for name, (x, y) in nodes.items():
-            color = 'lightgreen' if name == 'L' else 'white'
-            circle = plt.Circle((x, y), 0.4, facecolor=color, edgecolor='black', linewidth=1.5, zorder=10)
+            color = "lightgreen" if name == "L" else "white"
+            circle = plt.Circle(
+                (x, y),
+                0.4,
+                facecolor=color,
+                edgecolor="black",
+                linewidth=1.5,
+                zorder=10,
+            )
             ax.add_patch(circle)
-            ax.text(x, y, name, ha='center', va='center', fontsize=12, fontweight='bold', zorder=11)
+            ax.text(
+                x,
+                y,
+                name,
+                ha="center",
+                va="center",
+                fontsize=12,
+                fontweight="bold",
+                zorder=11,
+            )
 
         # --- ANNOTATIONS PEDAGOGIQUES ---
 
         # Sur la flèche de retour de w
         ax.text(
-                2, 1.2, r"$\frac{\partial L}{\partial w} = \text{Grad}_z \times x$",
-                color='#c0392b', fontsize=11, ha='center', bbox=dict(facecolor='white', alpha=0.8, edgecolor='none')
-                )
+            2,
+            1.2,
+            r"$\frac{\partial L}{\partial w} = \text{Grad}_z \times x$",
+            color="#c0392b",
+            fontsize=11,
+            ha="center",
+            bbox=dict(facecolor="white", alpha=0.8, edgecolor="none"),
+        )
 
         # Sur la flèche de retour de x
         ax.text(
-                2, 3.8, r"$\frac{\partial L}{\partial x} = \text{Grad}_z \times w$",
-                color='#c0392b', fontsize=11, ha='center', bbox=dict(facecolor='white', alpha=0.8, edgecolor='none')
-                )
+            2,
+            3.8,
+            r"$\frac{\partial L}{\partial x} = \text{Grad}_z \times w$",
+            color="#c0392b",
+            fontsize=11,
+            ha="center",
+            bbox=dict(facecolor="white", alpha=0.8, edgecolor="none"),
+        )
 
         # Légende
         ax.text(
-                5, 4.5, "Forward Pass (Calcul de la valeur)", color='#3498db', fontsize=14, ha='center',
-                fontweight='bold'
-                )
+            5,
+            4.5,
+            "Forward Pass (Calcul de la valeur)",
+            color="#3498db",
+            fontsize=14,
+            ha="center",
+            fontweight="bold",
+        )
         ax.text(
-                5, 0.5, "Backward Pass (Transport de l'urgence)", color='#e74c3c', fontsize=14, ha='center',
-                fontweight='bold'
-                )
+            5,
+            0.5,
+            "Backward Pass (Transport de l'urgence)",
+            color="#e74c3c",
+            fontsize=14,
+            ha="center",
+            fontweight="bold",
+        )
 
         ax.set_title('Le "Jeu du Téléphone" des Gradients', fontsize=16)
         plt.tight_layout()
@@ -757,7 +862,8 @@ def _(plot_computational_graph_improved):
 
 @app.cell
 def _(mo):
-    mo.md(r"""
+    mo.md(
+        r"""
     ### ⚠️ Note cruciale : L'Accumulation (`+=`)
 
     Que se passe-t-il si une variable est utilisée **plusieurs fois** ?
@@ -768,7 +874,8 @@ def _(mo):
     * Code : C'est pour ça qu'on utilise `self.grad += ...` et non `=`.
 
     Si $x$ influence la perte via deux chemins différents, on doit additionner l'urgence venant des deux chemins pour connaître l'urgence totale sur $x$.
-    """)
+    """
+    )
     return
 
 
@@ -779,18 +886,36 @@ def _(mo, np, plt):
         steps = np.arange(50)
 
         # Cas 1 : Dérivée locale < 1 (ex: fonction Tanh ou Sigmoid saturée)
-        grad_vanish = 1.0 * (0.8 ** steps)
+        grad_vanish = 1.0 * (0.8**steps)
 
         # Cas 2 : Dérivée locale > 1 (Exploding Gradient - l'inverse, tout explose)
-        grad_explode = 1.0 * (1.1 ** steps)
+        grad_explode = 1.0 * (1.1**steps)
 
         # Cas 3 : Idéal (LSTM / Residual connection)
         grad_stable = np.ones(50)
 
         fig, ax = plt.subplots(figsize=(10, 5))
-        ax.plot(steps, grad_vanish, label='Vanishing (facteur 0.8)', color='red', linewidth=3)
-        ax.plot(steps, grad_explode, label='Exploding (facteur 1.1)', color='orange', linestyle='--')
-        ax.plot(steps, grad_stable, label='Idéal (facteur 1.0)', color='green', linestyle=':')
+        ax.plot(
+            steps,
+            grad_vanish,
+            label="Vanishing (facteur 0.8)",
+            color="red",
+            linewidth=3,
+        )
+        ax.plot(
+            steps,
+            grad_explode,
+            label="Exploding (facteur 1.1)",
+            color="orange",
+            linestyle="--",
+        )
+        ax.plot(
+            steps,
+            grad_stable,
+            label="Idéal (facteur 1.0)",
+            color="green",
+            linestyle=":",
+        )
 
         ax.set_title("Pourquoi les RNN oublient le début du contexte ?")
         ax.set_xlabel("Nombre d'étapes en arrière (Backpropagation through Time)")
@@ -801,10 +926,11 @@ def _(mo, np, plt):
 
         # Annotation
         ax.annotate(
-                'Le signal devient nul ici !\nLe début du réseau ne change pas.',
-                xy=(20, 0.01), xytext=(25, 0.5),
-                arrowprops=dict(facecolor='black', shrink=0.05)
-                )
+            "Le signal devient nul ici !\nLe début du réseau ne change pas.",
+            xy=(20, 0.01),
+            xytext=(25, 0.5),
+            arrowprops=dict(facecolor="black", shrink=0.05),
+        )
 
         return fig
 

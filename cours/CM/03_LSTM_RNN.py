@@ -7,6 +7,7 @@ app = marimo.App(width="medium")
 @app.cell
 def _():
     import marimo as mo
+
     return (mo,)
 
 
@@ -33,7 +34,7 @@ def _(mo):
             - A chaque pas $t$ : le reseau recoit l'entree $x_t$ ET l'etat precedent $h_{t-1}$
             - L'etat cache agit comme une **memoire** des entrees passees
             """
-        )
+    )
     return
 
 
@@ -47,6 +48,7 @@ def _():
     import torch.nn as nn
     import torch.nn.functional as F
     from plotly.subplots import make_subplots
+
     torch.cuda.is_available()
     return F, go, make_subplots, nn, np, pathlib, torch
 
@@ -71,11 +73,11 @@ def _(abs_path_asset, mo, step):
     image_filename = f"rnn0{step.value}.gif"
 
     mo.image(
-            src=abs_path_asset / image_filename,
-            alt=f"RNN Step {step.value}",
-            rounded=True,
-            caption=f"Displaying {image_filename}"
-            )
+        src=abs_path_asset / image_filename,
+        alt=f"RNN Step {step.value}",
+        rounded=True,
+        caption=f"Displaying {image_filename}",
+    )
     return
 
 
@@ -103,7 +105,7 @@ def _(mo):
             | $W_{hh}$ | `(hidden_size, hidden_size)` | Poids cache → cache (recurrence) |
             | $b_h$ | `(hidden_size,)` | Biais |
             """
-        )
+    )
     return
 
 
@@ -115,7 +117,7 @@ def _(mo):
         
             Voyons comment implementer la formule $h_t = \tanh(W_{xh} \cdot x_t + W_{hh} \cdot h_{t-1} + b_h)$ :
             """
-        )
+    )
     return
 
 
@@ -140,10 +142,10 @@ def _(nn, torch):
     # === FORMULE MANUELLE ===
     # h_t = tanh(W_xh @ x_t + W_hh @ h_prev + b_h)
     h_manual = torch.tanh(
-            x_t @ W_xh.T +  # (1,4) @ (4,3) = (1,3)
-            h_prev @ W_hh.T +  # (1,3) @ (3,3) = (1,3)
-            b_h  # broadcast (3,) -> (1,3)
-            )
+        x_t @ W_xh.T  # (1,4) @ (4,3) = (1,3)
+        + h_prev @ W_hh.T  # (1,3) @ (3,3) = (1,3)
+        + b_h  # broadcast (3,) -> (1,3)
+    )
 
     print("=== Implementation manuelle ===")
     print(f"x_t shape: {x_t.shape}")
@@ -177,7 +179,7 @@ def _(mo):
         
             Pour une sequence $[x_1, x_2, ..., x_T]$, on applique la meme formule a chaque pas :
             """
-        )
+    )
     return
 
 
@@ -209,7 +211,9 @@ def _(nn, torch):
         x = sequence[t].unsqueeze(0)  # (1, input_dim)
         h = rnn(x, h)  # Formule: h_t = tanh(W_xh @ x_t + W_hh @ h_{t-1} + b)
         hidden_states.append(h.squeeze().clone())
-        print(f"t={t + 1}: x_t = {x.squeeze()[:2].tolist()}... -> h_t = {h.squeeze().tolist()}")
+        print(
+            f"t={t + 1}: x_t = {x.squeeze()[:2].tolist()}... -> h_t = {h.squeeze().tolist()}"
+        )
 
     print(f"\nL'etat final h_{seq_len} encode l'information de TOUTE la sequence!")
     return
@@ -221,20 +225,19 @@ def _(mo):
         r"""
             ## Visualisation : Evolution de l'etat cache
             """
-        )
+    )
     return
 
 
 @app.cell
 def _(mo):
     sequence_input = mo.ui.text(
-            value="le chat mange la souris",
-            label="Sequence d'entree (mots separes par espaces)"
-            )
+        value="le chat mange la souris",
+        label="Sequence d'entree (mots separes par espaces)",
+    )
     hidden_size_demo = mo.ui.slider(
-            start=2, stop=16, step=2, value=4,
-            label="Taille de l'etat cache"
-            )
+        start=2, stop=16, step=2, value=4, label="Taille de l'etat cache"
+    )
     mo.hstack([sequence_input, hidden_size_demo])
     return hidden_size_demo, sequence_input
 
@@ -267,41 +270,46 @@ def _(go, hidden_size_demo, make_subplots, mo, nn, np, sequence_input, torch):
     hidden_states_viz = np.array(hidden_states_viz)
 
     fig_rnn = make_subplots(
-            rows=1, cols=2,
-            subplot_titles=("Evolution de chaque dimension h[i]", "Heatmap des etats"),
-            column_widths=[0.5, 0.5]
-            )
+        rows=1,
+        cols=2,
+        subplot_titles=("Evolution de chaque dimension h[i]", "Heatmap des etats"),
+        column_widths=[0.5, 0.5],
+    )
 
     for dim in range(hidden_dim_viz):
         fig_rnn.add_trace(
-                go.Scatter(
-                        x=["init"] + words,
-                        y=hidden_states_viz[:, dim],
-                        mode='lines+markers',
-                        name=f'h[{dim}]'
-                        ),
-                row=1, col=1
-                )
+            go.Scatter(
+                x=["init"] + words,
+                y=hidden_states_viz[:, dim],
+                mode="lines+markers",
+                name=f"h[{dim}]",
+            ),
+            row=1,
+            col=1,
+        )
 
     fig_rnn.add_trace(
-            go.Heatmap(
-                    z=hidden_states_viz.T,
-                    x=["init"] + words,
-                    y=[f"h[{i}]" for i in range(hidden_dim_viz)],
-                    colorscale='RdBu',
-                    zmid=0
-                    ),
-            row=1, col=2
-            )
+        go.Heatmap(
+            z=hidden_states_viz.T,
+            x=["init"] + words,
+            y=[f"h[{i}]" for i in range(hidden_dim_viz)],
+            colorscale="RdBu",
+            zmid=0,
+        ),
+        row=1,
+        col=2,
+    )
 
     fig_rnn.update_layout(height=400, title_text="L'etat cache evolue a chaque mot")
 
     mo.vstack(
-            [
-                mo.md(f"**Vocabulaire**: {vocab} | **Embedding**: {embedding_dim} | **Hidden**: {hidden_dim_viz}"),
-                fig_rnn
-                ]
-            )
+        [
+            mo.md(
+                f"**Vocabulaire**: {vocab} | **Embedding**: {embedding_dim} | **Hidden**: {hidden_dim_viz}"
+            ),
+            fig_rnn,
+        ]
+    )
     return
 
 
@@ -327,16 +335,16 @@ def _(mo):
         
             > Un Vanishing Gradient (gradient proche de zéro) signifie que le réseau met à jour ses poids uniquement en fonction des erreurs récentes. Concrètement, le début de la séquence n'a plus aucun impact sur l'apprentissage : le réseau devient amnésique aux événements passés.
             """
-        )
+    )
     return
 
 
 @app.cell
 def _(abs_path_asset, mo):
     mo.image(
-            src=abs_path_asset / "rnn_gradiant.png",
-            rounded=True,
-            )
+        src=abs_path_asset / "rnn_gradiant.png",
+        rounded=True,
+    )
     return
 
 
@@ -344,44 +352,55 @@ def _(abs_path_asset, mo):
 def _(go, mo, np):
     steps = np.arange(0, 50)
 
-    gradient_0_9 = 0.9 ** steps
-    gradient_1_0 = 1.0 ** steps
-    gradient_1_1 = 1.1 ** steps
+    gradient_0_9 = 0.9**steps
+    gradient_1_0 = 1.0**steps
+    gradient_1_1 = 1.1**steps
 
     fig_gradient = go.Figure()
     fig_gradient.add_trace(
         go.Scatter(
-            x=steps, y=gradient_0_9, mode='lines',
-            name='||W|| = 0.9 (vanishing)', line=dict(color='blue', width=2)
-            )
+            x=steps,
+            y=gradient_0_9,
+            mode="lines",
+            name="||W|| = 0.9 (vanishing)",
+            line=dict(color="blue", width=2),
         )
+    )
     fig_gradient.add_trace(
         go.Scatter(
-            x=steps, y=gradient_1_0, mode='lines',
-            name='||W|| = 1.0 (stable)', line=dict(color='green', width=2, dash='dash')
-            )
+            x=steps,
+            y=gradient_1_0,
+            mode="lines",
+            name="||W|| = 1.0 (stable)",
+            line=dict(color="green", width=2, dash="dash"),
         )
+    )
     fig_gradient.add_trace(
         go.Scatter(
-            x=steps, y=np.clip(gradient_1_1, 0, 100), mode='lines',
-            name='||W|| = 1.1 (exploding)', line=dict(color='red', width=2)
-            )
+            x=steps,
+            y=np.clip(gradient_1_1, 0, 100),
+            mode="lines",
+            name="||W|| = 1.1 (exploding)",
+            line=dict(color="red", width=2),
         )
+    )
 
     fig_gradient.update_layout(
-            title="Evolution du gradient : (||W||)^t",
-            xaxis_title="Nombre de pas t",
-            yaxis_title="Magnitude (echelle log)",
-            yaxis_type="log",
-            height=350
-            )
+        title="Evolution du gradient : (||W||)^t",
+        xaxis_title="Nombre de pas t",
+        yaxis_title="Magnitude (echelle log)",
+        yaxis_type="log",
+        height=350,
+    )
 
     mo.vstack(
-            [
-                fig_gradient,
-                mo.md("> Apres 50 pas avec $\|W\| = 0.9$, le gradient vaut $0.9^{50} \\approx 0.005$ soit **0.5%** !")
-                ]
-            )
+        [
+            fig_gradient,
+            mo.md(
+                "> Apres 50 pas avec $\|W\| = 0.9$, le gradient vaut $0.9^{50} \\approx 0.005$ soit **0.5%** !"
+            ),
+        ]
+    )
     return
 
 
@@ -393,7 +412,7 @@ def _(mo):
         
             Visualisons le gradient qui remonte dans le temps :
             """
-        )
+    )
     return
 
 
@@ -452,7 +471,9 @@ def _(nn, torch):
 @app.cell
 def _(mo):
     # Sliders pour contrôler l'expérience
-    slider_seq = mo.ui.slider(start=10, stop=100, step=10, value=50, label="Longueur de Séquence")
+    slider_seq = mo.ui.slider(
+        start=10, stop=100, step=10, value=50, label="Longueur de Séquence"
+    )
     slider_seq
     return (slider_seq,)
 
@@ -473,66 +494,84 @@ def _(get_gradient_norms, go, mo, slider_seq):
 
         # Trace RNN (Rouge - Le "mauvais élève")
         viz_fig.add_trace(
-                go.Scatter(
-                        x=viz_steps,
-                        y=viz_grads_rnn,
-                        mode='lines+markers',
-                        name='RNN Classique',
-                        line=dict(color='#ef553b', width=2),
-                        marker=dict(size=6)
-                        )
-                )
+            go.Scatter(
+                x=viz_steps,
+                y=viz_grads_rnn,
+                mode="lines+markers",
+                name="RNN Classique",
+                line=dict(color="#ef553b", width=2),
+                marker=dict(size=6),
+            )
+        )
 
         # Trace LSTM (Vert - Le "bon élève")
         viz_fig.add_trace(
-                go.Scatter(
-                        x=viz_steps,
-                        y=viz_grads_lstm,
-                        mode='lines+markers',
-                        name='LSTM',
-                        line=dict(color='#00cc96', width=2, dash='dash'),
-                        marker=dict(size=6, symbol='x')
-                        )
-                )
+            go.Scatter(
+                x=viz_steps,
+                y=viz_grads_lstm,
+                mode="lines+markers",
+                name="LSTM",
+                line=dict(color="#00cc96", width=2, dash="dash"),
+                marker=dict(size=6, symbol="x"),
+            )
+        )
 
         # 3. Mise en page (Layout pédagogique)
         viz_fig.update_layout(
-                title=f"<b>Vanishing Gradient</b> (Séquence T={viz_seq_len})",
-                xaxis_title="Pas de temps (t)",
-                yaxis_title="Norme du Gradient (Log Scale)",
-                yaxis_type="log",  # Échelle log indispensable
-                hovermode="x unified",
-                template="plotly_white",
-                height=500,
-                legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01)
-                )
+            title=f"<b>Vanishing Gradient</b> (Séquence T={viz_seq_len})",
+            xaxis_title="Pas de temps (t)",
+            yaxis_title="Norme du Gradient (Log Scale)",
+            yaxis_type="log",  # Échelle log indispensable
+            hovermode="x unified",
+            template="plotly_white",
+            height=500,
+            legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01),
+        )
 
         # Ajout d'une zone rouge "Zone Morte"
         viz_fig.add_hrect(
-                y0=0, y1=1e-10,
-                fillcolor="red", opacity=0.1, layer="below", line_width=0,
-                annotation_text="Zone de Vanishing Gradient (Information Perdue)",
-                annotation_position="bottom right"
-                )
+            y0=0,
+            y1=1e-10,
+            fillcolor="red",
+            opacity=0.1,
+            layer="below",
+            line_width=0,
+            annotation_text="Zone de Vanishing Gradient (Information Perdue)",
+            annotation_position="bottom right",
+        )
 
         # Annotations temporelles pour orienter l'étudiant
-        viz_fig.add_annotation(x=0, y=viz_grads_lstm[0], text="⬅ Début (Passé lointain)", showarrow=True, arrowhead=1)
         viz_fig.add_annotation(
-            x=viz_seq_len - 1, y=viz_grads_lstm[-1], text="Fin (Présent) ➡", showarrow=True, arrowhead=1
-            )
+            x=0,
+            y=viz_grads_lstm[0],
+            text="⬅ Début (Passé lointain)",
+            showarrow=True,
+            arrowhead=1,
+        )
+        viz_fig.add_annotation(
+            x=viz_seq_len - 1,
+            y=viz_grads_lstm[-1],
+            text="Fin (Présent) ➡",
+            showarrow=True,
+            arrowhead=1,
+        )
 
         # 4. Calcul des statistiques
-        viz_ratio_rnn = viz_grads_rnn[0] / viz_grads_rnn[-1] if viz_grads_rnn[-1] != 0 else 0
-        viz_ratio_lstm = viz_grads_lstm[0] / viz_grads_lstm[-1] if viz_grads_lstm[-1] != 0 else 0
+        viz_ratio_rnn = (
+            viz_grads_rnn[0] / viz_grads_rnn[-1] if viz_grads_rnn[-1] != 0 else 0
+        )
+        viz_ratio_lstm = (
+            viz_grads_lstm[0] / viz_grads_lstm[-1] if viz_grads_lstm[-1] != 0 else 0
+        )
 
         # 5. Rendu final
         return mo.vstack(
-                [
-                    mo.md("### 📉 Analyse Dynamique"),
-                    viz_fig,
-                    mo.callout(
-                            mo.md(
-                                f"""
+            [
+                mo.md("### 📉 Analyse Dynamique"),
+                viz_fig,
+                mo.callout(
+                    mo.md(
+                        f"""
                 **Diagnostic :**
             
                 * **RNN (Ligne Rouge)** : Ratio Début/Fin = **{viz_ratio_rnn:.2e}**.
@@ -540,11 +579,11 @@ def _(get_gradient_norms, go, mo, slider_seq):
                 * **LSTM (Ligne Verte)** : Ratio Début/Fin = **{viz_ratio_lstm:.2f}**.
                     * Le gradient reste stable. L'information circule librement du passé vers le présent.
                 """
-                                ),
-                            kind="danger" if viz_ratio_rnn < 1e-3 else "success"
-                            )
-                    ]
-                )
+                    ),
+                    kind="danger" if viz_ratio_rnn < 1e-3 else "success",
+                ),
+            ]
+        )
 
     _()
     return
@@ -572,7 +611,7 @@ def _(mo):
             | $i_t$ (input gate) | Controle ce qu'on **ajoute** a $C_t$ |
             | $o_t$ (output gate) | Controle ce qu'on **produit** dans $h_t$ |
             """
-        )
+    )
     return
 
 
@@ -588,7 +627,7 @@ def _(mo):
         
             Sortie entre 0 (tout oublier) et 1 (tout garder).
             """
-        )
+    )
     return
 
 
@@ -636,7 +675,7 @@ def _(mo, torch):
     3.  **Vecteur Forget Gate (`lstm_f_t`)** :
         * Résultat : `{tuple(lstm_f_t.shape)}`
     """
-        )
+    )
 
     # Interprétation des valeurs
     lstm_vals = lstm_f_t[0].detach().numpy()
@@ -645,17 +684,17 @@ def _(mo, torch):
         action1 = "🟢 GARDER" if val > 0.5 else "🔴 OUBLIER"
         lstm_interpretation.append(
             f"* **Neurone {lstm_i}** (val={val:.2f}) : {action1} {val * 100:.0f}% de la mémoire."
-            )
+        )
 
     mo.vstack(
-            [
-                mo.md("### 🧠 Anatomie d'une Forget Gate"),
-                lstm_dims_info,
-                mo.md("---"),
-                mo.md("**Décision de la porte (f_t) :**"),
-                mo.md("\n".join(lstm_interpretation))
-                ]
-            )
+        [
+            mo.md("### 🧠 Anatomie d'une Forget Gate"),
+            lstm_dims_info,
+            mo.md("---"),
+            mo.md("**Décision de la porte (f_t) :**"),
+            mo.md("\n".join(lstm_interpretation)),
+        ]
+    )
     return lstm_combined, lstm_f_t, lstm_hidden_sz, lstm_input_sz
 
 
@@ -672,7 +711,7 @@ def _(mo):
             - $i_t$ : quelles dimensions mettre a jour (0 ou 1)
             - $\tilde{C}_t$ : candidates pour la mise a jour (entre -1 et 1)
             """
-        )
+    )
     return
 
 
@@ -707,19 +746,23 @@ def _(lstm_combined, lstm_hidden_sz, lstm_input_sz, mo, torch):
         cand_val = lstm_C_tilde[0][idx1].item()
         final_val = lstm_added_info[0][idx1].item()
 
-        status = "🔒 FERMÉ" if gate_val1 < 0.3 else ("🔓 OUVERT" if gate_val1 > 0.7 else "⚠️ MOYEN")
+        status = (
+            "🔒 FERMÉ"
+            if gate_val1 < 0.3
+            else ("🔓 OUVERT" if gate_val1 > 0.7 else "⚠️ MOYEN")
+        )
 
         lstm_lines.append(
-                f"* **Neurone {idx1}** : Porte({gate_val1:.2f}) $\\times$ Candidat({cand_val:.2f}) = **{final_val:.2f}** $\\rightarrow$ {status}"
-                )
+            f"* **Neurone {idx1}** : Porte({gate_val1:.2f}) $\\times$ Candidat({cand_val:.2f}) = **{final_val:.2f}** $\\rightarrow$ {status}"
+        )
 
     mo.vstack(
-            [
-                mo.md("### ✍️ Input Gate : Création et Filtrage"),
-                mo.callout(mo.md("\n".join(lstm_lines)), kind="info"),
-                mo.md(f"**Shape du résultat ajouté** : `{tuple(lstm_added_info.shape)}`")
-                ]
-            )
+        [
+            mo.md("### ✍️ Input Gate : Création et Filtrage"),
+            mo.callout(mo.md("\n".join(lstm_lines)), kind="info"),
+            mo.md(f"**Shape du résultat ajouté** : `{tuple(lstm_added_info.shape)}`"),
+        ]
+    )
     return lstm_C_tilde, lstm_i_t
 
 
@@ -733,7 +776,7 @@ def _(mo):
         
             C'est **LA** formule cle ! Le gradient peut circuler directement via $C_{t-1} \to C_t$.
             """
-        )
+    )
     return
 
 
@@ -764,20 +807,22 @@ def _(lstm_C_tilde, lstm_f_t, lstm_hidden_sz, lstm_i_t, mo, torch):
         new = lstm_C_t_1[0][lstm_idx2].item()
 
         lstm_explanation.append(
-                f"**N{lstm_idx2}** : (Ancien `{old:.2f}` $\\rightarrow$ Gardé `{kept:.2f}`) + (Ajout `{added:.2f}`) = **Nouvel État `{new:.2f}`**"
-                )
+            f"**N{lstm_idx2}** : (Ancien `{old:.2f}` $\\rightarrow$ Gardé `{kept:.2f}`) + (Ajout `{added:.2f}`) = **Nouvel État `{new:.2f}`**"
+        )
 
     mo.vstack(
-            [
-                mo.md("### 🔄 Mise à jour de la Mémoire ($C_t$)"),
-                mo.md(r"$$C_t = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t$$"),
-                mo.md("\n\n".join(lstm_explanation)),
-                mo.callout(
-                        mo.md(f"**Résultat final `lstm_C_t_1` shape**: `{tuple(lstm_C_t_1.shape)}`"),
-                        kind="success"
-                        )
-                ]
-            )
+        [
+            mo.md("### 🔄 Mise à jour de la Mémoire ($C_t$)"),
+            mo.md(r"$$C_t = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t$$"),
+            mo.md("\n\n".join(lstm_explanation)),
+            mo.callout(
+                mo.md(
+                    f"**Résultat final `lstm_C_t_1` shape**: `{tuple(lstm_C_t_1.shape)}`"
+                ),
+                kind="success",
+            ),
+        ]
+    )
     return (lstm_C_t_1,)
 
 
@@ -791,7 +836,7 @@ def _(mo):
         
             $$h_t = o_t \odot \tanh(C_t)$$
             """
-        )
+    )
     return
 
 
@@ -829,29 +874,30 @@ def _(lstm_C_t_1, lstm_combined, lstm_hidden_sz, lstm_input_sz, mo, torch):
         h_val = lstm_h_t[0][idx3].item()
 
         # Visualisation
-        action3 = "📢 DIRE" if gate_val3 > 0.6 else ("🤫 CHUCHOTER" if gate_val3 > 0.3 else "🤐 TAIRE")
+        action3 = (
+            "📢 DIRE"
+            if gate_val3 > 0.6
+            else ("🤫 CHUCHOTER" if gate_val3 > 0.3 else "🤐 TAIRE")
+        )
 
         output_lines.append(
-                f"* **Neurone {idx3}** : Mémoire({mem_val:.2f}) filtrée par Porte({gate_val3:.2f}) $\\rightarrow$ **Sortie h_t : {h_val:.2f}** ({action3})"
-                )
+            f"* **Neurone {idx3}** : Mémoire({mem_val:.2f}) filtrée par Porte({gate_val3:.2f}) $\\rightarrow$ **Sortie h_t : {h_val:.2f}** ({action3})"
+        )
 
     mo.vstack(
-            [
-                mo.md("### 🗣️ Output Gate : Le Porte-Parole"),
-                mo.md(r"$$h_t = o_t \odot \tanh(C_t)$$"),
-
-                mo.md(
-                    """
+        [
+            mo.md("### 🗣️ Output Gate : Le Porte-Parole"),
+            mo.md(r"$$h_t = o_t \odot \tanh(C_t)$$"),
+            mo.md(
+                """
                             La **Cell State ($C_t$)** contient *tout* l'historique (compteurs, parenthèses ouvertes, contexte lointain).
                             L'**Output Gate ($o_t$)** décide quelle partie est utile *immédiatement*.
                             """
-                    ),
-
-                mo.callout(mo.md("\n".join(output_lines)), kind="info"),
-
-                mo.md("### 📏 Bilan des Dimensions Finales"),
-                mo.md(
-                    f"""
+            ),
+            mo.callout(mo.md("\n".join(output_lines)), kind="info"),
+            mo.md("### 📏 Bilan des Dimensions Finales"),
+            mo.md(
+                f"""
         * **Porte ($o_t$)** : `{tuple(lstm_o_t.shape)}`
         * **Mémoire normalisée ($\tanh(C_t)$)** : `{tuple(lstm_memory_tanh.shape)}`
         * **État Caché Final ($h_t$)** : `{tuple(lstm_h_t.shape)}`
@@ -860,9 +906,9 @@ def _(lstm_C_t_1, lstm_combined, lstm_hidden_sz, lstm_input_sz, mo, torch):
         1. La sortie de cette couche pour ce pas de temps.
         2. L'entrée $h_{{t-1}}$ pour le prochain pas de temps.
         """
-                    )
-                ]
-            )
+            ),
+        ]
+    )
     return
 
 
@@ -874,7 +920,7 @@ def _(mo):
         
             Comparons notre implementation manuelle avec PyTorch :
             """
-        )
+    )
     return
 
 
@@ -930,7 +976,9 @@ def _(nn, torch):
         print(f"h_t Manuel:  {h_out_manual.squeeze().tolist()}")
         print(f"C_t PyTorch: {c_out_pt.squeeze().tolist()}")
         print(f"C_t Manuel:  {c_out_manual.squeeze().tolist()}")
-        return print(f"\nDifference max: {(h_out_pt - h_out_manual).abs().max().item():.2e}")
+        return print(
+            f"\nDifference max: {(h_out_pt - h_out_manual).abs().max().item():.2e}"
+        )
 
     _()
     return
@@ -965,7 +1013,7 @@ def _(mo):
             * Il peut donc traverser 100 pas de temps sans être modifié ni écrasé.
             * C'est ce qu'on appelle la **Constant Error Carousel** ou l'**Autoroute du Gradient**.
             """
-        )
+    )
     return
 
 
@@ -975,49 +1023,47 @@ def _(mo):
         r"""
             ## Visualisation interactive des portes LSTM
             """
-        )
+    )
     return
 
 
 @app.cell
 def _(mo):
     lstm_sequence_cb = mo.ui.text(
-            value="le deep learning est fascinant",
-            label="Séquence d'entrée (phrase)"
-            )
+        value="le deep learning est fascinant", label="Séquence d'entrée (phrase)"
+    )
     lstm_hidden_slider_cb = mo.ui.slider(
-            start=4, stop=32, step=4, value=8,
-            label="Taille de l'État Caché (Neurones)"
-            )
+        start=4, stop=32, step=4, value=8, label="Taille de l'État Caché (Neurones)"
+    )
 
     mo.vstack(
-            [
-                mo.md("### 🎛️ Paramètres"),
-                mo.hstack([lstm_sequence_cb, lstm_hidden_slider_cb])
-                ]
-            )
+        [
+            mo.md("### 🎛️ Paramètres"),
+            mo.hstack([lstm_sequence_cb, lstm_hidden_slider_cb]),
+        ]
+    )
     return lstm_hidden_slider_cb, lstm_sequence_cb
 
 
 @app.cell
 def _(
-        go,
-        lstm_hidden_slider_cb,
-        lstm_sequence_cb,
-        make_subplots,
-        mo,
-        nn,
-        np,
-        torch,
-        ):
+    go,
+    lstm_hidden_slider_cb,
+    lstm_sequence_cb,
+    make_subplots,
+    mo,
+    nn,
+    np,
+    torch,
+):
     def _():
         CB_COLORS = {
             "forget": "#D55E00",  # Vermillon (remplace le Rouge)
-            "input":  "#009E73",  # Vert bleuté (remplace le Vert)
+            "input": "#009E73",  # Vert bleuté (remplace le Vert)
             "output": "#56B4E9",  # Bleu ciel (remplace le Bleu standard)
             "h_norm": "#0072B2",  # Bleu foncé (remplace le Violet)
             "c_norm": "#E69F00",  # Orange (remplace l'Orange précédent, plus distinct)
-            }
+        }
 
         # --- PREPARATION (Idem précédent) ---
         text_val = lstm_sequence_cb.value
@@ -1036,10 +1082,14 @@ def _(
         word_embeddings = lstm_embedding_layer(indices)
 
         history = {
-            "h": [h_t.detach().numpy().flatten()], "c": [c_t.detach().numpy().flatten()],
-            "gate_forget": [], "gate_input": [], "gate_output": [],
-            "h_norm": [0], "c_norm": [0]
-            }
+            "h": [h_t.detach().numpy().flatten()],
+            "c": [c_t.detach().numpy().flatten()],
+            "gate_forget": [],
+            "gate_input": [],
+            "gate_output": [],
+            "h_norm": [0],
+            "c_norm": [0],
+        }
 
         for t in range(len(words)):
             x_t = word_embeddings[t].unsqueeze(0)
@@ -1047,8 +1097,12 @@ def _(
             h_t, c_t = lstm_cell(x_t, (h_t, c_t))
 
             with torch.no_grad():
-                gates_raw = (x_t @ lstm_cell.weight_ih.T + h_prev @ lstm_cell.weight_hh.T +
-                             lstm_cell.bias_ih + lstm_cell.bias_hh)
+                gates_raw = (
+                    x_t @ lstm_cell.weight_ih.T
+                    + h_prev @ lstm_cell.weight_hh.T
+                    + lstm_cell.bias_ih
+                    + lstm_cell.bias_hh
+                )
                 i_raw, f_raw, g_raw, o_raw = gates_raw.chunk(4, dim=1)
                 history["gate_input"].append(torch.sigmoid(i_raw).mean().item())
                 history["gate_forget"].append(torch.sigmoid(f_raw).mean().item())
@@ -1064,15 +1118,17 @@ def _(
 
         # --- VISUALISATION ADAPTÉE ---
         fig = make_subplots(
-                rows=2, cols=2,
-                subplot_titles=(
-                    "<b>1. Activité Moyenne des Portes</b>",
-                    "<b>2. État Caché (Court Terme)</b> $h_t$",
-                    "<b>3. Norme des Vecteurs</b> (Force du signal)",
-                    "<b>4. État de Cellule (Long Terme)</b> $C_t$"
-                    ),
-                vertical_spacing=0.15, horizontal_spacing=0.1
-                )
+            rows=2,
+            cols=2,
+            subplot_titles=(
+                "<b>1. Activité Moyenne des Portes</b>",
+                "<b>2. État Caché (Court Terme)</b> $h_t$",
+                "<b>3. Norme des Vecteurs</b> (Force du signal)",
+                "<b>4. État de Cellule (Long Terme)</b> $C_t$",
+            ),
+            vertical_spacing=0.15,
+            horizontal_spacing=0.1,
+        )
 
         x_axis = words
 
@@ -1080,66 +1136,100 @@ def _(
         # Note : J'ai aussi changé les styles de ligne pour ajouter une distinction non-couleur
         fig.add_trace(
             go.Scatter(
-                x=x_axis, y=history["gate_forget"], name='Forget Gate (Oubli)',
-                line=dict(color=CB_COLORS["forget"], width=3, dash='solid')
-                ), row=1, col=1
-            )
+                x=x_axis,
+                y=history["gate_forget"],
+                name="Forget Gate (Oubli)",
+                line=dict(color=CB_COLORS["forget"], width=3, dash="solid"),
+            ),
+            row=1,
+            col=1,
+        )
         fig.add_trace(
             go.Scatter(
-                x=x_axis, y=history["gate_input"], name='Input Gate (Ajout)',
-                line=dict(color=CB_COLORS["input"], width=3, dash='dot')
-                ), row=1, col=1
-            )
+                x=x_axis,
+                y=history["gate_input"],
+                name="Input Gate (Ajout)",
+                line=dict(color=CB_COLORS["input"], width=3, dash="dot"),
+            ),
+            row=1,
+            col=1,
+        )
         fig.add_trace(
             go.Scatter(
-                x=x_axis, y=history["gate_output"], name='Output Gate (Sortie)',
-                line=dict(color=CB_COLORS["output"], width=2, dash='dash')
-                ), row=1, col=1
-            )
+                x=x_axis,
+                y=history["gate_output"],
+                name="Output Gate (Sortie)",
+                line=dict(color=CB_COLORS["output"], width=2, dash="dash"),
+            ),
+            row=1,
+            col=1,
+        )
 
         # Plot 2: Heatmap h_t (Viridis est 'colorblind-safe')
         fig.add_trace(
             go.Heatmap(
-                z=arr_h, x=x_axis, y=[f"N{i}" for i in range(hidden_dim)],
-                colorscale='Viridis', showscale=False, name="Hidden State"
-                ), row=1, col=2
-            )
+                z=arr_h,
+                x=x_axis,
+                y=[f"N{i}" for i in range(hidden_dim)],
+                colorscale="Viridis",
+                showscale=False,
+                name="Hidden State",
+            ),
+            row=1,
+            col=2,
+        )
 
         # Plot 3: Normes (Nouvelles couleurs CB)
         fig.add_trace(
             go.Scatter(
-                x=x_axis, y=history["h_norm"][1:], name='||h_t|| (Court terme)',
-                line=dict(color=CB_COLORS["h_norm"], width=2)
-                ), row=2, col=1
-            )
+                x=x_axis,
+                y=history["h_norm"][1:],
+                name="||h_t|| (Court terme)",
+                line=dict(color=CB_COLORS["h_norm"], width=2),
+            ),
+            row=2,
+            col=1,
+        )
         fig.add_trace(
             go.Scatter(
-                x=x_axis, y=history["c_norm"][1:], name='||C_t|| (Long terme)',
-                line=dict(color=CB_COLORS["c_norm"], width=3)
-                ), row=2, col=1
-            )
+                x=x_axis,
+                y=history["c_norm"][1:],
+                name="||C_t|| (Long terme)",
+                line=dict(color=CB_COLORS["c_norm"], width=3),
+            ),
+            row=2,
+            col=1,
+        )
 
         # Plot 4: Heatmap C_t (Remplacement de Plasma par CIVIDIS)
         # Cividis est spécifiquement conçue pour les daltoniens.
         fig.add_trace(
             go.Heatmap(
-                z=arr_c, x=x_axis, y=[f"N{i}" for i in range(hidden_dim)],
-                colorscale='Cividis', showscale=False, name="Cell State"
-                ), row=2, col=2
-            )
+                z=arr_c,
+                x=x_axis,
+                y=[f"N{i}" for i in range(hidden_dim)],
+                colorscale="Cividis",
+                showscale=False,
+                name="Cell State",
+            ),
+            row=2,
+            col=2,
+        )
 
         fig.update_layout(
-            height=700, title_text=f"🧠 IRM d'un LSTM (Mode Accessible)", template="plotly_white",
-            legend=dict(orientation="h", y=-0.1)
-            )
+            height=700,
+            title_text=f"🧠 IRM d'un LSTM (Mode Accessible)",
+            template="plotly_white",
+            legend=dict(orientation="h", y=-0.1),
+        )
         fig.update_xaxes(tickangle=-45)
 
         # Mise à jour du texte explicatif pour refléter les nouvelles couleurs
         return mo.vstack(
-                [
-                    mo.callout(
-                        mo.md(
-                            f"""
+            [
+                mo.callout(
+                    mo.md(
+                        f"""
             **Guide des Couleurs (Palette Accessible Okabe-Ito) :**
         
             * **Graphique 1 (Portes)** :
@@ -1151,11 +1241,12 @@ def _(
                 * <span style="color:{CB_COLORS['c_norm']}">■</span> **Orange (Ligne épaisse)** : Mémoire Long Terme ($C_t$).
                 * <span style="color:{CB_COLORS['h_norm']}">■</span> **Bleu Foncé (Ligne fine)** : Mémoire Court Terme ($h_t$).
             """
-                            ), kind="info"
-                        ),
-                    mo.ui.plotly(fig)
-                    ]
-                )
+                    ),
+                    kind="info",
+                ),
+                mo.ui.plotly(fig),
+            ]
+        )
 
     _()
     return
@@ -1187,7 +1278,7 @@ def _(mo):
         
             $$\boxed{h_t = (1 - z_t) \odot h_{t-1} + z_t \odot \tilde{h}_t}$$
             """
-        )
+    )
     return
 
 
@@ -1240,7 +1331,7 @@ def _(mo):
             | **Vanishing gradient** | Problematique | Resolu | Resolu |
             | **Cas d'usage** | Sequences courtes | NLP, longues deps | Compromis perf/vitesse |
             """
-        )
+    )
     return
 
 
@@ -1258,7 +1349,7 @@ def _(mo):
             Texte -> Tokenization -> Embedding -> LSTM -> Linear -> Prediction
             ```
             """
-        )
+    )
     return
 
 
@@ -1283,7 +1374,7 @@ def _(allocine, np):
 
     def tokenize(text):
         text = text.lower()
-        text = re.sub(r'[^\w\s]', ' ', text)
+        text = re.sub(r"[^\w\s]", " ", text)
         return text.split()
 
     all_tokens = []
@@ -1302,7 +1393,9 @@ def _(allocine, np):
     print(f"Top 5: {most_common[:5]}")
 
     review_lengths = [len(tokenize(r)) for r in allocine["review"]]
-    print(f"Longueur: moyenne={np.mean(review_lengths):.0f}, mediane={np.median(review_lengths):.0f}")
+    print(
+        f"Longueur: moyenne={np.mean(review_lengths):.0f}, mediane={np.median(review_lengths):.0f}"
+    )
     return tokenize, vocab_size_sentiment, word2idx
 
 
@@ -1328,8 +1421,8 @@ def _(allocine, allocine_test, data_utils, tokenize, torch, word2idx):
         def __getitem__(self, idx):
             return (
                 torch.tensor(self.reviews[idx], dtype=torch.long),
-                torch.tensor(self.labels[idx], dtype=torch.long)
-                )
+                torch.tensor(self.labels[idx], dtype=torch.long),
+            )
 
     train_dataset = SentimentDataset(allocine, max_len)
     test_dataset = SentimentDataset(allocine_test, max_len)
@@ -1345,7 +1438,7 @@ def _(mo):
         r"""
             ### Modele LSTM pour la classification
             """
-        )
+    )
     return
 
 
@@ -1353,9 +1446,15 @@ def _(mo):
 def _(nn, torch):
     class SentimentLSTM(nn.Module):
         def __init__(
-                self, vocab_size, embedding_dim, hidden_dim, output_dim,
-                n_layers=1, bidirectional=False, dropout=0.3
-                ):
+            self,
+            vocab_size,
+            embedding_dim,
+            hidden_dim,
+            output_dim,
+            n_layers=1,
+            bidirectional=False,
+            dropout=0.3,
+        ):
             super().__init__()
 
             # Embedding: mot -> vecteur dense
@@ -1363,12 +1462,13 @@ def _(nn, torch):
 
             # LSTM: sequence -> representation
             self.lstm = nn.LSTM(
-                    embedding_dim, hidden_dim,
-                    num_layers=n_layers,
-                    bidirectional=bidirectional,
-                    dropout=dropout if n_layers > 1 else 0,
-                    batch_first=True
-                    )
+                embedding_dim,
+                hidden_dim,
+                num_layers=n_layers,
+                bidirectional=bidirectional,
+                dropout=dropout if n_layers > 1 else 0,
+                batch_first=True,
+            )
 
             # Classifieur
             lstm_output_dim = hidden_dim * 2 if bidirectional else hidden_dim
@@ -1399,27 +1499,35 @@ def _(mo):
         r"""
             ### Configuration de l'entrainement
             """
-        )
+    )
     return
 
 
 @app.cell
 def _(mo):
-    embed_dim_slider = mo.ui.slider(start=32, stop=256, step=32, value=64, label="Dim embedding")
-    hidden_dim_slider = mo.ui.slider(start=32, stop=256, step=32, value=128, label="Dim LSTM")
+    embed_dim_slider = mo.ui.slider(
+        start=32, stop=256, step=32, value=64, label="Dim embedding"
+    )
+    hidden_dim_slider = mo.ui.slider(
+        start=32, stop=256, step=32, value=128, label="Dim LSTM"
+    )
     n_layers_slider = mo.ui.slider(start=1, stop=3, step=1, value=1, label="Nb couches")
     bidirectional_checkbox = mo.ui.checkbox(value=True, label="Bidirectionnel")
-    batch_size_select = mo.ui.dropdown(options={"32": 32, "64": 64, "128": 128}, value="64", label="Batch")
-    lr_slider = mo.ui.slider(start=0.0001, stop=0.01, step=0.0001, value=0.001, label="Learning rate")
+    batch_size_select = mo.ui.dropdown(
+        options={"32": 32, "64": 64, "128": 128}, value="64", label="Batch"
+    )
+    lr_slider = mo.ui.slider(
+        start=0.0001, stop=0.01, step=0.0001, value=0.001, label="Learning rate"
+    )
     epochs_select = mo.ui.slider(start=1, stop=10, step=1, value=3, label="Epoques")
 
     mo.vstack(
-            [
-                mo.hstack([embed_dim_slider, hidden_dim_slider]),
-                mo.hstack([n_layers_slider, bidirectional_checkbox]),
-                mo.hstack([batch_size_select, lr_slider, epochs_select])
-                ]
-            )
+        [
+            mo.hstack([embed_dim_slider, hidden_dim_slider]),
+            mo.hstack([n_layers_slider, bidirectional_checkbox]),
+            mo.hstack([batch_size_select, lr_slider, epochs_select]),
+        ]
+    )
     return (
         batch_size_select,
         bidirectional_checkbox,
@@ -1428,43 +1536,47 @@ def _(mo):
         hidden_dim_slider,
         lr_slider,
         n_layers_slider,
-        )
+    )
 
 
 @app.cell
 def _(
-        SentimentLSTM,
-        batch_size_select,
-        bidirectional_checkbox,
-        data_utils,
-        embed_dim_slider,
-        hidden_dim_slider,
-        mo,
-        n_layers_slider,
-        test_dataset,
-        train_dataset,
-        vocab_size_sentiment,
-        ):
+    SentimentLSTM,
+    batch_size_select,
+    bidirectional_checkbox,
+    data_utils,
+    embed_dim_slider,
+    hidden_dim_slider,
+    mo,
+    n_layers_slider,
+    test_dataset,
+    train_dataset,
+    vocab_size_sentiment,
+):
     sentiment_model = SentimentLSTM(
-            vocab_size=vocab_size_sentiment,
-            embedding_dim=embed_dim_slider.value,
-            hidden_dim=hidden_dim_slider.value,
-            output_dim=2,
-            n_layers=n_layers_slider.value,
-            bidirectional=bidirectional_checkbox.value,
-            dropout=0.3
-            )
+        vocab_size=vocab_size_sentiment,
+        embedding_dim=embed_dim_slider.value,
+        hidden_dim=hidden_dim_slider.value,
+        output_dim=2,
+        n_layers=n_layers_slider.value,
+        bidirectional=bidirectional_checkbox.value,
+        dropout=0.3,
+    )
 
     total_params = sum(p.numel() for p in sentiment_model.parameters())
 
-    train_loader = data_utils.DataLoader(train_dataset, batch_size=int(batch_size_select.value), shuffle=True)
-    test_loader = data_utils.DataLoader(test_dataset, batch_size=int(batch_size_select.value), shuffle=False)
+    train_loader = data_utils.DataLoader(
+        train_dataset, batch_size=int(batch_size_select.value), shuffle=True
+    )
+    test_loader = data_utils.DataLoader(
+        test_dataset, batch_size=int(batch_size_select.value), shuffle=False
+    )
 
     mo.md(
         f"""
     **Modele**: {"Bi-" if bidirectional_checkbox.value else ""}LSTM | **Params**: {total_params:,}
     """
-        )
+    )
     return sentiment_model, test_loader, train_loader
 
 
@@ -1477,18 +1589,21 @@ def _(mo):
 
 @app.cell
 def _(
-        epochs_select,
-        go,
-        lr_slider,
-        mo,
-        nn,
-        sentiment_model,
-        test_loader,
-        torch,
-        train_button,
-        train_loader,
-        ):
-    mo.stop(not train_button.value, mo.md("Cliquez sur le bouton pour lancer l'entrainement"))
+    epochs_select,
+    go,
+    lr_slider,
+    mo,
+    nn,
+    sentiment_model,
+    test_loader,
+    torch,
+    train_button,
+    train_loader,
+):
+    mo.stop(
+        not train_button.value,
+        mo.md("Cliquez sur le bouton pour lancer l'entrainement"),
+    )
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model_to_train = sentiment_model.to(device)
@@ -1532,35 +1647,42 @@ def _(
     fig_training = go.Figure()
     fig_training.add_trace(
         go.Scatter(
-            x=list(range(1, len(train_losses) + 1)), y=train_losses,
-            name='Loss', yaxis='y2'
-            )
+            x=list(range(1, len(train_losses) + 1)),
+            y=train_losses,
+            name="Loss",
+            yaxis="y2",
         )
+    )
     fig_training.add_trace(
         go.Scatter(
             x=list(range(1, len(train_accs) + 1)),
-            y=[a * 100 for a in train_accs], name='Train Acc'
-            )
+            y=[a * 100 for a in train_accs],
+            name="Train Acc",
         )
+    )
     fig_training.add_trace(
         go.Scatter(
             x=list(range(1, len(test_accs) + 1)),
-            y=[a * 100 for a in test_accs], name='Test Acc'
-            )
+            y=[a * 100 for a in test_accs],
+            name="Test Acc",
         )
+    )
     fig_training.update_layout(
-            title="Courbes d'entrainement",
-            xaxis_title="Epoque", yaxis_title="Accuracy (%)",
-            yaxis2=dict(title="Loss", overlaying='y', side='right'),
-            height=350
-            )
+        title="Courbes d'entrainement",
+        xaxis_title="Epoque",
+        yaxis_title="Accuracy (%)",
+        yaxis2=dict(title="Loss", overlaying="y", side="right"),
+        height=350,
+    )
 
     mo.vstack(
-            [
-                mo.md(f"**Termine!** Train: **{train_accs[-1] * 100:.1f}%** | Test: **{test_accs[-1] * 100:.1f}%**"),
-                fig_training
-                ]
-            )
+        [
+            mo.md(
+                f"**Termine!** Train: **{train_accs[-1] * 100:.1f}%** | Test: **{test_accs[-1] * 100:.1f}%**"
+            ),
+            fig_training,
+        ]
+    )
     return device, model_to_train
 
 
@@ -1570,32 +1692,32 @@ def _(mo):
         r"""
             ### Testez le modele !
             """
-        )
+    )
     return
 
 
 @app.cell
 def _(mo):
     user_review = mo.ui.text_area(
-            value="Ce film est vraiment excellent, les acteurs jouent a merveille !",
-            label="Votre critique",
-            rows=2
-            )
+        value="Ce film est vraiment excellent, les acteurs jouent a merveille !",
+        label="Votre critique",
+        rows=2,
+    )
     user_review
     return (user_review,)
 
 
 @app.cell
 def _(
-        F,
-        device,
-        encode_review,
-        max_len,
-        mo,
-        model_to_train,
-        torch,
-        user_review,
-        ):
+    F,
+    device,
+    encode_review,
+    max_len,
+    mo,
+    model_to_train,
+    torch,
+    user_review,
+):
     model_to_train.eval()
     with torch.no_grad():
         encoded = encode_review(user_review.value, max_len)
@@ -1631,7 +1753,7 @@ def _(mo):
             - **Transformer** : remplace les RNN dans beaucoup d'applications modernes
             - **BERT, GPT** : modeles pre-entraines bases sur Transformers
             """
-        )
+    )
     return
 
 

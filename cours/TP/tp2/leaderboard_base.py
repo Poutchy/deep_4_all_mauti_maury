@@ -29,9 +29,11 @@ import torch.nn as nn
 # Configuration
 # =============================================================================
 
+
 @dataclass
 class LeaderboardConfig:
     """Configuration pour un leaderboard."""
+
     name: str  # Nom du tournoi (ex: "Oracle", "Dungeon")
     title: str  # Titre affiché
     description: str  # Description courte
@@ -47,6 +49,7 @@ class LeaderboardConfig:
 # Utilitaires modèle
 # =============================================================================
 
+
 def count_parameters(model: nn.Module) -> int:
     """Compte le nombre de paramètres entraînables."""
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -55,30 +58,34 @@ def count_parameters(model: nn.Module) -> int:
 def get_architecture_summary(model: nn.Module) -> dict:
     """Extrait un résumé de l'architecture du modèle."""
     summary = {
-        'class_name': model.__class__.__name__,
-        'n_params':   count_parameters(model),
-        'layers':     []
-        }
+        "class_name": model.__class__.__name__,
+        "n_params": count_parameters(model),
+        "layers": [],
+    }
     for name, module in model.named_modules():
         if name:
-            layer_info = {'name': name, 'type': module.__class__.__name__}
+            layer_info = {"name": name, "type": module.__class__.__name__}
             if isinstance(module, nn.Linear):
-                layer_info['shape'] = f"{module.in_features}->{module.out_features}"
+                layer_info["shape"] = f"{module.in_features}->{module.out_features}"
             elif isinstance(module, nn.Embedding):
-                layer_info['shape'] = f"{module.num_embeddings}x{module.embedding_dim}"
+                layer_info["shape"] = f"{module.num_embeddings}x{module.embedding_dim}"
             elif isinstance(module, nn.LSTM):
-                layer_info['shape'] = f"in={module.input_size}, hidden={module.hidden_size}"
+                layer_info["shape"] = (
+                    f"in={module.input_size}, hidden={module.hidden_size}"
+                )
             elif isinstance(module, nn.GRU):
-                layer_info['shape'] = f"in={module.input_size}, hidden={module.hidden_size}"
+                layer_info["shape"] = (
+                    f"in={module.input_size}, hidden={module.hidden_size}"
+                )
             elif isinstance(module, nn.Dropout):
-                layer_info['p'] = module.p
-            summary['layers'].append(layer_info)
+                layer_info["p"] = module.p
+            summary["layers"].append(layer_info)
     return summary
 
 
 def compute_model_hash(model_path: str) -> str:
     """Calcule le hash MD5 du modèle."""
-    with open(model_path, 'rb') as f:
+    with open(model_path, "rb") as f:
         return hashlib.md5(f.read()).hexdigest()[:12]
 
 
@@ -93,7 +100,7 @@ def load_model_from_file(model_path: str) -> tuple:
         (model, architecture) si succès, (None, error_message) sinon
     """
     try:
-        loaded = torch.load(model_path, map_location='cpu', weights_only=False)
+        loaded = torch.load(model_path, map_location="cpu", weights_only=False)
 
         if isinstance(loaded, nn.Module):
             model = loaded
@@ -110,6 +117,7 @@ def load_model_from_file(model_path: str) -> tuple:
 # =============================================================================
 # Base de données SQLite
 # =============================================================================
+
 
 class LeaderboardDB:
     """Gestionnaire de base de données pour le leaderboard."""
@@ -139,28 +147,28 @@ class LeaderboardDB:
                 is_best INTEGER DEFAULT 0
             )
         """
-            )
+        )
 
         cursor.execute(
             f"""
             CREATE INDEX IF NOT EXISTS idx_{self.table_name}_team_name
             ON {self.table_name}(team_name)
         """
-            )
+        )
 
         conn.commit()
         conn.close()
 
     def save_submission(
-            self,
-            team_name: str,
-            model_hash: str,
-            val_acc: float,
-            test_acc: float,
-            test_f1: float,
-            n_params: int,
-            architecture: dict
-            ) -> int:
+        self,
+        team_name: str,
+        model_hash: str,
+        val_acc: float,
+        test_acc: float,
+        test_f1: float,
+        n_params: int,
+        architecture: dict,
+    ) -> int:
         """Sauvegarde une soumission dans la base."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -171,8 +179,9 @@ class LeaderboardDB:
             SELECT MAX(test_accuracy)
             FROM {self.table_name}
             WHERE team_name = ?
-        """, (team_name,)
-            )
+        """,
+            (team_name,),
+        )
         best_score = cursor.fetchone()[0]
 
         is_best = 1 if best_score is None or test_acc > best_score else 0
@@ -184,8 +193,9 @@ class LeaderboardDB:
                 UPDATE {self.table_name}
                 SET is_best = 0
                 WHERE team_name = ?
-            """, (team_name,)
-                )
+            """,
+                (team_name,),
+            )
 
         cursor.execute(
             f"""
@@ -193,11 +203,18 @@ class LeaderboardDB:
             (team_name, model_hash, val_accuracy, test_accuracy, test_f1,
              n_params, architecture, is_best)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-                    team_name, model_hash, val_acc, test_acc, test_f1,
-                    n_params, json.dumps(architecture), is_best
-                    )
-            )
+        """,
+            (
+                team_name,
+                model_hash,
+                val_acc,
+                test_acc,
+                test_f1,
+                n_params,
+                json.dumps(architecture),
+                is_best,
+            ),
+        )
 
         submission_id = cursor.lastrowid
         conn.commit()
@@ -220,13 +237,14 @@ class LeaderboardDB:
             FROM {self.table_name}
             WHERE is_best = 1
             ORDER BY test_accuracy DESC
-        """, conn
-            )
+        """,
+            conn,
+        )
 
         conn.close()
 
         if len(df) > 0:
-            df.insert(0, 'Rang', range(1, len(df) + 1))
+            df.insert(0, "Rang", range(1, len(df) + 1))
 
         return df
 
@@ -254,28 +272,30 @@ class LeaderboardDB:
         # 2. Calcul de l'efficacité avec Numpy (Plus robuste que le SQL)
         # Formule : Accuracy / Log10(Params)
         # Cela évite qu'un modèle à 10 paramètres avec 5% d'acc batte un modèle à 1M params et 90% d'acc.
-        df['efficiency_score'] = df['test_accuracy'] / np.log10(df['n_params'])
+        df["efficiency_score"] = df["test_accuracy"] / np.log10(df["n_params"])
 
         # 3. Filtrage : On ne garde que la meilleure soumission par équipe (selon l'efficacité)
-        df = df.sort_values('efficiency_score', ascending=False)
-        df = df.drop_duplicates(subset=['team_name'], keep='first')
+        df = df.sort_values("efficiency_score", ascending=False)
+        df = df.drop_duplicates(subset=["team_name"], keep="first")
 
         # 4. Mise en forme pour l'affichage (Cosmétique uniquement)
         # On crée un nouveau DataFrame propre pour l'affichage final
         display_df = pd.DataFrame()
-        display_df['Rang'] = range(1, len(df) + 1)
-        display_df['Equipe'] = df['team_name']
-        display_df['Val Acc (%)'] = (df['val_accuracy'] * 100).round(2)
-        display_df['Test Secret (%)'] = (df['test_accuracy'] * 100).round(2)
-        display_df['Gap (%)'] = ((df['val_accuracy'] - df['test_accuracy']) * 100).round(2)
+        display_df["Rang"] = range(1, len(df) + 1)
+        display_df["Equipe"] = df["team_name"]
+        display_df["Val Acc (%)"] = (df["val_accuracy"] * 100).round(2)
+        display_df["Test Secret (%)"] = (df["test_accuracy"] * 100).round(2)
+        display_df["Gap (%)"] = (
+            (df["val_accuracy"] - df["test_accuracy"]) * 100
+        ).round(2)
 
         # Formatage des paramètres (ex: 1.2M ou entier)
-        display_df['Params'] = df['n_params']
+        display_df["Params"] = df["n_params"]
 
         # Score d'efficacité (multiplié par 100 pour lisibilité, mais basé sur le log)
-        display_df['Efficacité'] = (df['efficiency_score'] * 100).round(4)
+        display_df["Efficacité"] = (df["efficiency_score"] * 100).round(4)
 
-        display_df['Soumis le'] = df['submitted_at']
+        display_df["Soumis le"] = df["submitted_at"]
 
         return display_df
 
@@ -284,31 +304,34 @@ class LeaderboardDB:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        cursor.execute(f'SELECT COUNT(DISTINCT team_name) FROM {self.table_name}')
+        cursor.execute(f"SELECT COUNT(DISTINCT team_name) FROM {self.table_name}")
         n_teams = cursor.fetchone()[0]
 
-        cursor.execute(f'SELECT COUNT(*) FROM {self.table_name}')
+        cursor.execute(f"SELECT COUNT(*) FROM {self.table_name}")
         n_submissions = cursor.fetchone()[0]
 
-        cursor.execute(f'SELECT MAX(test_accuracy) FROM {self.table_name}')
+        cursor.execute(f"SELECT MAX(test_accuracy) FROM {self.table_name}")
         best_score = cursor.fetchone()[0]
 
-        cursor.execute(f'SELECT AVG(test_accuracy) FROM {self.table_name} WHERE is_best = 1')
+        cursor.execute(
+            f"SELECT AVG(test_accuracy) FROM {self.table_name} WHERE is_best = 1"
+        )
         avg_score = cursor.fetchone()[0]
 
         conn.close()
 
         return {
-            'n_teams':       n_teams or 0,
-            'n_submissions': n_submissions or 0,
-            'best_score':    best_score or 0,
-            'avg_score':     avg_score or 0
-            }
+            "n_teams": n_teams or 0,
+            "n_submissions": n_submissions or 0,
+            "best_score": best_score or 0,
+            "avg_score": avg_score or 0,
+        }
 
 
 # =============================================================================
 # Évaluation de modèle (abstrait)
 # =============================================================================
+
 
 class ModelEvaluator(ABC):
     """Classe abstraite pour l'évaluation de modèles."""
@@ -325,11 +348,13 @@ class ModelEvaluator(ABC):
 
 
 def compute_metrics(
-        predictions: Union[torch.Tensor, np.ndarray],
-        labels: Union[torch.Tensor, np.ndarray]
-        ) -> dict:
+    predictions: Union[torch.Tensor, np.ndarray],
+    labels: Union[torch.Tensor, np.ndarray],
+) -> dict:
     """Calcule les métriques de classification binaire."""
-    predictions = predictions.numpy() if isinstance(predictions, torch.Tensor) else predictions
+    predictions = (
+        predictions.numpy() if isinstance(predictions, torch.Tensor) else predictions
+    )
     labels = labels.numpy() if isinstance(labels, torch.Tensor) else labels
 
     accuracy = (predictions == labels).mean()
@@ -341,19 +366,22 @@ def compute_metrics(
 
     precision = tp / (tp + fp) if (tp + fp) > 0 else 0
     recall = tp / (tp + fn) if (tp + fn) > 0 else 0
-    f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0
+    f1 = (
+        2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0
+    )
 
     return {
-        'accuracy':  float(accuracy),
-        'f1':        float(f1),
-        'precision': float(precision),
-        'recall':    float(recall)
-        }
+        "accuracy": float(accuracy),
+        "f1": float(f1),
+        "precision": float(precision),
+        "recall": float(recall),
+    }
 
 
 # =============================================================================
 # Application Gradio
 # =============================================================================
+
 
 class LeaderboardApp:
     """Application Gradio pour un leaderboard."""
@@ -370,29 +398,44 @@ class LeaderboardApp:
     def process_submission(self, team_name: str, model_file) -> tuple:
         """Traite une soumission : charge, évalue, sauvegarde."""
         if not team_name or not team_name.strip():
-            return "Erreur: Veuillez entrer un nom d'équipe.", *self._get_both_leaderboards()
+            return (
+                "Erreur: Veuillez entrer un nom d'équipe.",
+                *self._get_both_leaderboards(),
+            )
 
         team_name = team_name.strip()
 
         if model_file is None:
-            return "Erreur: Veuillez uploader un fichier modèle (.pt)", *self._get_both_leaderboards()
+            return (
+                "Erreur: Veuillez uploader un fichier modèle (.pt)",
+                *self._get_both_leaderboards(),
+            )
 
         if not self.config.test_secret_path.exists():
-            return "Erreur: Dataset test secret non trouvé. Contactez l'enseignant.", *self._get_both_leaderboards()
+            return (
+                "Erreur: Dataset test secret non trouvé. Contactez l'enseignant.",
+                *self._get_both_leaderboards(),
+            )
 
         if not self.config.val_path.exists():
-            return "Erreur: Dataset validation non trouvé.", *self._get_both_leaderboards()
+            return (
+                "Erreur: Dataset validation non trouvé.",
+                *self._get_both_leaderboards(),
+            )
 
-        model_path = model_file.name if hasattr(model_file, 'name') else model_file
+        model_path = model_file.name if hasattr(model_file, "name") else model_file
 
-        if model_path.endswith('.zip'):
+        if model_path.endswith(".zip"):
             with tempfile.TemporaryDirectory() as tmp_dir:
-                with zipfile.ZipFile(model_path, 'r') as zip_ref:
+                with zipfile.ZipFile(model_path, "r") as zip_ref:
                     zip_ref.extractall(tmp_dir)
 
-                pt_files = list(Path(tmp_dir).rglob('*.pt'))
+                pt_files = list(Path(tmp_dir).rglob("*.pt"))
                 if not pt_files:
-                    return "Erreur: Aucun fichier .pt trouvé dans le ZIP.", *self._get_both_leaderboards()
+                    return (
+                        "Erreur: Aucun fichier .pt trouvé dans le ZIP.",
+                        *self._get_both_leaderboards(),
+                    )
 
                 model_path = str(pt_files[0])
                 return self._evaluate_and_save(team_name, model_path)
@@ -417,17 +460,17 @@ class LeaderboardApp:
 
         # Sauvegarder
         submission_id = self.db.save_submission(
-                team_name=team_name,
-                model_hash=model_hash,
-                val_acc=val_results['accuracy'],
-                test_acc=test_results['accuracy'],
-                test_f1=test_results['f1'],
-                n_params=n_params,
-                architecture=config
-                )
+            team_name=team_name,
+            model_hash=model_hash,
+            val_acc=val_results["accuracy"],
+            test_acc=test_results["accuracy"],
+            test_f1=test_results["f1"],
+            n_params=n_params,
+            architecture=config,
+        )
 
         # Construire le message de résultat
-        gap = val_results['accuracy'] - test_results['accuracy']
+        gap = val_results["accuracy"] - test_results["accuracy"]
 
         val_acc_str = f"{val_results['accuracy']:.2%}"
         test_acc_str = f"{test_results['accuracy']:.2%}"
@@ -483,16 +526,13 @@ class LeaderboardApp:
         """Crée l'application Gradio."""
         self.db.init_database()
 
-        with gr.Blocks(
-                title=self.config.title,
-                theme=gr.themes.Soft()
-                ) as app:
+        with gr.Blocks(title=self.config.title, theme=gr.themes.Soft()) as app:
             gr.Markdown(
                 f"""
 # {self.config.title}
 ### {self.config.description}
             """
-                )
+            )
 
             with gr.Tabs():
                 # Tab 1: Soumission
@@ -500,20 +540,18 @@ class LeaderboardApp:
                     with gr.Row():
                         with gr.Column(scale=1):
                             team_input = gr.Textbox(
-                                    label="Nom de l'équipe",
-                                    placeholder="Ex: Les Dragons de PyTorch",
-                                    max_lines=1
-                                    )
+                                label="Nom de l'équipe",
+                                placeholder="Ex: Les Dragons de PyTorch",
+                                max_lines=1,
+                            )
                             model_input = gr.File(
-                                    label="Modèle (.pt ou .zip)",
-                                    file_types=[".pt", ".zip"],
-                                    type="filepath"
-                                    )
+                                label="Modèle (.pt ou .zip)",
+                                file_types=[".pt", ".zip"],
+                                type="filepath",
+                            )
                             submit_btn = gr.Button(
-                                    "Soumettre",
-                                    variant="primary",
-                                    size="lg"
-                                    )
+                                "Soumettre", variant="primary", size="lg"
+                            )
 
                         with gr.Column(scale=2):
                             result_output = gr.Markdown(label="Résultat")
@@ -528,20 +566,20 @@ class LeaderboardApp:
                         with gr.Column():
                             gr.Markdown("#### Meilleure Accuracy")
                             leaderboard_table = gr.Dataframe(
-                                    value=self.db.get_leaderboard(),
-                                    label="Classement par accuracy (meilleur score par équipe)",
-                                    interactive=False,
-                                    wrap=True
-                                    )
+                                value=self.db.get_leaderboard(),
+                                label="Classement par accuracy (meilleur score par équipe)",
+                                interactive=False,
+                                wrap=True,
+                            )
 
                         with gr.Column():
                             gr.Markdown("#### Meilleur Ratio Accuracy/Taille")
                             leaderboard_efficient_table = gr.Dataframe(
-                                    value=self.db.get_leaderboard_efficient(),
-                                    label="Classement par efficacite (accuracy / params)",
-                                    interactive=False,
-                                    wrap=True
-                                    )
+                                value=self.db.get_leaderboard_efficient(),
+                                label="Classement par efficacite (accuracy / params)",
+                                interactive=False,
+                                wrap=True,
+                            )
 
                     refresh_btn = gr.Button("Rafraîchir", size="sm")
 
@@ -551,15 +589,19 @@ class LeaderboardApp:
 
             # Events
             submit_btn.click(
-                    fn=self.process_submission,
-                    inputs=[team_input, model_input],
-                    outputs=[result_output, leaderboard_table, leaderboard_efficient_table]
-                    )
+                fn=self.process_submission,
+                inputs=[team_input, model_input],
+                outputs=[result_output, leaderboard_table, leaderboard_efficient_table],
+            )
 
             refresh_btn.click(
-                    fn=lambda: (self.db.get_leaderboard(), self.db.get_leaderboard_efficient(), self.get_stats_text()),
-                    outputs=[leaderboard_table, leaderboard_efficient_table, stats_display]
-                    )
+                fn=lambda: (
+                    self.db.get_leaderboard(),
+                    self.db.get_leaderboard_efficient(),
+                    self.get_stats_text(),
+                ),
+                outputs=[leaderboard_table, leaderboard_efficient_table, stats_display],
+            )
 
         return app
 
@@ -614,8 +656,4 @@ class LeaderboardApp:
         print("=" * 60)
 
         app = self.create_app()
-        app.launch(
-                server_port=self.config.port,
-                share=True,
-                show_error=True
-                )
+        app.launch(server_port=self.config.port, share=True, show_error=True)

@@ -7,7 +7,7 @@ class Value:
     Stocke une valeur (data) et son gradient (grad).
     """
 
-    def __init__(self, data, _sources=(), _op_symbol=''):
+    def __init__(self, data, _sources=(), _op_symbol=""):
         self.data = data
         self.grad = 0.0  # dL/d(self)
 
@@ -23,7 +23,7 @@ class Value:
         other = other if isinstance(other, Value) else Value(other)
 
         # Forward : z = x + y
-        out = Value(self.data + other.data, (self, other), '+')
+        out = Value(self.data + other.data, (self, other), "+")
 
         def _backward():
             # --- MATHÉMATIQUES ---
@@ -49,7 +49,7 @@ class Value:
         other = other if isinstance(other, Value) else Value(other)
 
         # Forward : z = x * y
-        out = Value(self.data * other.data, (self, other), '*')
+        out = Value(self.data * other.data, (self, other), "*")
 
         def _backward():
             # --- MATHÉMATIQUES ---
@@ -58,7 +58,7 @@ class Value:
 
             grad_externe = out.grad  # dL/dz
 
-            derivee_locale_self =  other.data # dz/dy = x
+            derivee_locale_self = other.data  # dz/dy = x
             derivee_locale_other = self.data  # dz/dx = y
 
             # Application de la Chain Rule
@@ -75,7 +75,7 @@ class Value:
         assert isinstance(exponent, (int, float)), "L'exposant doit être un scalaire"
 
         # Forward : z = x^n
-        out = Value(self.data ** exponent, (self,), f'^{exponent}')
+        out = Value(self.data**exponent, (self,), f"^{exponent}")
 
         def _backward():
             # --- MATHÉMATIQUES ---
@@ -97,7 +97,7 @@ class Value:
     # ==========================================================================
     def relu(self):
         # Forward
-        out = Value(0 if self.data < 0 else self.data, (self,), 'ReLU')
+        out = Value(0 if self.data < 0 else self.data, (self,), "ReLU")
 
         def _backward():
             # --- MATHÉMATIQUES ---
@@ -112,10 +112,10 @@ class Value:
 
         out._backward = _backward
         return out
-    
+
     def sigmoid(self):
         # Forward
-        out = Value(1 / (1 + math.exp(-self.data)), (self,), 'sigmoid')
+        out = Value(1 / (1 + math.exp(-self.data)), (self,), "sigmoid")
 
         def _backward():
             # --- MATHÉMATIQUES ---

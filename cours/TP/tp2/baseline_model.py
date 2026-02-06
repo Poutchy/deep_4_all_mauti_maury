@@ -48,15 +48,12 @@ class GuildOracle(nn.Module):
         dropout_p = min(0.1 + 0.05 * num_layers, 0.5)
         activation = nn.ReLU() if num_layers <= 3 else nn.LeakyReLU(0.1)
 
-        dims = [
-            int(max(hidden_dim // (2 ** i), 8))
-            for i in range(num_layers)
-        ]
+        dims = [int(max(hidden_dim // (2**i), 8)) for i in range(num_layers)]
 
         layers = [
             nn.Linear(input_dim, dims[0]),
             # nn.BatchNorm1d(dims[0]),
-            activation
+            activation,
         ]
 
         for i in range(num_layers - 1):
@@ -127,17 +124,17 @@ class DungeonOracle(nn.Module):
     """
 
     def __init__(
-            self,
-            vocab_size: int,
-            embed_dim: int = 2,
-            hidden_dim: int = 258,
-            num_layers: int = 1,
-            dropout: float = 0.0,
-            mode: str = "linear",
-            bidirectional: bool = False,
-            padding_idx: int = 0,
-            max_length: int = 140
-            ):
+        self,
+        vocab_size: int,
+        embed_dim: int = 2,
+        hidden_dim: int = 258,
+        num_layers: int = 1,
+        dropout: float = 0.0,
+        mode: str = "linear",
+        bidirectional: bool = False,
+        padding_idx: int = 0,
+        max_length: int = 140,
+    ):
         """
         Args:
             vocab_size: Taille du vocabulaire (nombre d'événements uniques)
@@ -159,44 +156,40 @@ class DungeonOracle(nn.Module):
         # Couche d'embedding : transforme les IDs en vecteurs denses
         # Le padding_idx=0 fait que le vecteur pour <PAD> reste à zéro
         self.embedding = nn.Embedding(
-                num_embeddings=vocab_size,
-                embedding_dim=embed_dim,
-                padding_idx=padding_idx
-                )
+            num_embeddings=vocab_size, embedding_dim=embed_dim, padding_idx=padding_idx
+        )
 
         # Approche Baseline Linéaire (Alternative au RNN)
         # On aplatit tout : (Batch, Seq_Len * Embed_Dim)
         self.solo_embeddings = nn.Sequential(
-                nn.Flatten(),
-                nn.Linear(max_length * embed_dim, hidden_dim),
-                nn.ReLU(),
-                nn.Dropout(dropout),
-                nn.Linear(hidden_dim, hidden_dim),
-                nn.ReLU(),
-                nn.Dropout(dropout),
-                nn.Linear(hidden_dim, 1)  # Sortie directe pour comparaison
-                )
+            nn.Flatten(),
+            nn.Linear(max_length * embed_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.Linear(hidden_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.Linear(hidden_dim, 1),  # Sortie directe pour comparaison
+        )
         if self.mode != "linear":
             # Couche récurrente
             # PROBLEME: Par défaut c'est un RNN simple qui souffre du vanishing gradient
             rnn_class = nn.LSTM if self.mode == "lstm" else nn.RNN
 
             self.rnn = rnn_class(
-                    input_size=embed_dim,
-                    hidden_size=hidden_dim,
-                    num_layers=num_layers,
-                    batch_first=True,
-                    dropout=dropout if num_layers > 1 else 0,
-                    bidirectional=bidirectional
-                    )
+                input_size=embed_dim,
+                hidden_size=hidden_dim,
+                num_layers=num_layers,
+                batch_first=True,
+                dropout=dropout if num_layers > 1 else 0,
+                bidirectional=bidirectional,
+            )
 
             # Couche de classification
             # Si bidirectionnel, on a 2x hidden_dim
             classifier_input_dim = hidden_dim * 2 if bidirectional else hidden_dim
 
-            self.classifier = nn.Sequential(
-                    nn.Linear(classifier_input_dim, 1)
-                    )
+            self.classifier = nn.Sequential(nn.Linear(classifier_input_dim, 1))
 
     def forward(self, x: torch.Tensor, lengths: torch.Tensor = None) -> torch.Tensor:
         """
@@ -243,7 +236,9 @@ class DungeonOracle(nn.Module):
         else:
             return self.solo_embeddings(embedded)
 
-    def predict_proba(self, x: torch.Tensor, lengths: torch.Tensor = None) -> torch.Tensor:
+    def predict_proba(
+        self, x: torch.Tensor, lengths: torch.Tensor = None
+    ) -> torch.Tensor:
         """Retourne les probabilités de survie."""
         with torch.no_grad():
             logits = self.forward(x, lengths)
@@ -262,6 +257,7 @@ class DungeonOracle(nn.Module):
 # ============================================================================
 # Fonctions utilitaires
 # ============================================================================
+
 
 def count_parameters(model: nn.Module) -> int:
     """Compte le nombre de paramètres entraînables."""

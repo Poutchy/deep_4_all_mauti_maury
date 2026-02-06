@@ -6,6 +6,7 @@ from micrograd.engine import Value
 #                           CLASSE DE BASE: MODULE
 # ==============================================================================
 
+
 class Module:
     """Classe parente pour gérer les paramètres et les gradients."""
 
@@ -23,10 +24,11 @@ class Module:
 #                               NEURONE (Neuron)
 # ==============================================================================
 
+
 class Neuron(Module):
     """
     Un neurone artificiel unique.
-    
+
     Notations Mathématiques :
     -------------------------
     1. Pré-activation (z) : z = (Σ w_i * x_i) + b
@@ -74,10 +76,11 @@ class Neuron(Module):
 #                                COUCHE (Layer)
 # ==============================================================================
 
+
 class Layer(Module):
     """
     Une couche de neurones indépendants.
-    
+
     Structure :
     Input x -> [Neurone 1, Neurone 2, ...] -> Output y (vecteur)
     """
@@ -112,6 +115,7 @@ class Layer(Module):
 #                         MLP (Multi-Layer Perceptron)
 # ==============================================================================
 
+
 class MLP(Module):
     """
     Le réseau complet. Une séquence de couches.
@@ -133,11 +137,9 @@ class MLP(Module):
             # Elle prend sz[i] entrées et produit sz[i+1] sorties
 
             # La dernière couche est souvent linéaire (pas de ReLU)
-            est_derniere = (i == len(nouts) - 1)
+            est_derniere = i == len(nouts) - 1
 
-            self.layers.append(
-                    Layer(sz[i], sz[i + 1], nonlin=not est_derniere)
-                    )
+            self.layers.append(Layer(sz[i], sz[i + 1], nonlin=not est_derniere))
 
     def __call__(self, x):
         """
@@ -181,5 +183,9 @@ if __name__ == "__main__":
 
     print("\n--- Analyse d'un neurone de la 1ère couche ---")
     premier_neurone = model.layers[0].neurons[0]
-    print(f"Poids w[0] : valeur={premier_neurone.w[0].data:.4f}, grad={premier_neurone.w[0].grad:.4f}")
-    print(f"Si j'augmente w[0], la Loss va {'augmenter' if premier_neurone.w[0].grad > 0 else 'diminuer'}.")
+    print(
+        f"Poids w[0] : valeur={premier_neurone.w[0].data:.4f}, grad={premier_neurone.w[0].grad:.4f}"
+    )
+    print(
+        f"Si j'augmente w[0], la Loss va {'augmenter' if premier_neurone.w[0].grad > 0 else 'diminuer'}."
+    )

@@ -7,6 +7,7 @@ app = marimo.App(width="medium")
 @app.cell
 def _():
     import marimo as mo
+
     return (mo,)
 
 
@@ -18,19 +19,19 @@ def _(mo):
     _asset_dir = Path(__file__).parent / "asset"
 
     mo.vstack(
-            [
-                mo.md(
-                    r"""
+        [
+            mo.md(
+                r"""
                         # Word Embedding (Représentation vectorielle des mots)
                     
                         **Word Embedding** est une représentation des mots qui permet à des mots ayant un sens similaire d'avoir une représentation semblable. Il s'agit d'une méthode d'apprentissage non supervisé sur un vaste corpus textuel, où le modèle apprend à prédire un mot à partir de son contexte ou inversement. Une fois entraîné, cette méthode produit des représentations vectorielles où des mots proches dans cet espace à haute dimension sont censés être sémantiquement similaires.
                     
                         Contrairement à une simple assignation de vecteurs uniques par mot, les embeddings capturent des similarités **sémantiques** ou **syntaxiques** basées sur le corpus d'entraînement. Les vecteurs d'embedding contiennent souvent des centaines de dimensions et identifient des relations nuancées entre les mots.
                             """
-                    ),
-                mo.image(src=_asset_dir / "word_embed.png"),
-                mo.md(
-                    r"""
+            ),
+            mo.image(src=_asset_dir / "word_embed.png"),
+            mo.md(
+                r"""
                         ---
                     
                         ## Couche d'Embedding (Embedding Layer)
@@ -49,9 +50,9 @@ def _(mo):
                     
                         La couche d'embedding agit uniquement comme une **table de correspondance**. Chaque index est associé à un vecteur dense qui peut être mis à jour lors de l'entraînement.
                             """
-                    )
-                ]
-            )
+            ),
+        ]
+    )
     return
 
 
@@ -64,6 +65,7 @@ def _():
     import torch.nn as nn
     import torch.nn.functional as F
     import torch.utils.data as data
+
     return F, data, go, nn, np, pd, torch
 
 
@@ -71,14 +73,13 @@ def _():
 def _(mo):
     # UI pour configurer la couche d'embedding de démonstration
     embedding_dim_slider = mo.ui.slider(
-            start=2, stop=16, step=1, value=5,
-            label="Dimension de l'embedding"
-            )
+        start=2, stop=16, step=1, value=5, label="Dimension de l'embedding"
+    )
     word_selector = mo.ui.dropdown(
-            options={"hello": "hello", "world": "world"},
-            value="hello",
-            label="Mot à visualiser"
-            )
+        options={"hello": "hello", "world": "world"},
+        value="hello",
+        label="Mot à visualiser",
+    )
     mo.hstack([embedding_dim_slider, word_selector])
     return embedding_dim_slider, word_selector
 
@@ -104,7 +105,7 @@ def _(embedding_dim_slider, mo, nn, torch, word_selector):
     - Dimension de l'embedding: {embedding_dim_slider.value}
     - Vecteur d'embedding: `{selected_embed.detach().numpy()}`
     """
-        )
+    )
     return (embeds,)
 
 
@@ -114,7 +115,7 @@ def _(mo):
         r"""
             Paramètres d'entrainements
             """
-        )
+    )
     return
 
 
@@ -128,7 +129,7 @@ def _(embeds, mo):
     {params_list[0]}
     ```
     """
-        )
+    )
     return
 
 
@@ -138,7 +139,7 @@ def _(mo):
         r"""
             Juste pour le fun on définie nos propres paramètres
             """
-        )
+    )
     return
 
 
@@ -148,11 +149,12 @@ def _(nn, torch):
     embeds_custom = nn.Embedding(num_embeddings=2, embedding_dim=5)
 
     embedding_lookup = torch.tensor(
-            [
-                [1, 0, 0, 0, 1],
-                [0, 1, 1, 1, 0],
-                ], dtype=torch.float32
-            )
+        [
+            [1, 0, 0, 0, 1],
+            [0, 1, 1, 1, 0],
+        ],
+        dtype=torch.float32,
+    )
     embeds_custom.weight = nn.Parameter(embedding_lookup)
     for param_custom in embeds_custom.parameters():
         print(param_custom)
@@ -165,7 +167,7 @@ def _(mo):
         r"""
             Comme vous pouvez le constater, si je sélectionne l'index 0 ou 1, j'obtiens ma ligne embedding_lookup
             """
-        )
+    )
     return
 
 
@@ -184,7 +186,7 @@ def _(mo):
         
             Regardons le tout premier modèle GPT et voyons la taille de la couche d'embedding.
             """
-        )
+    )
     return
 
 
@@ -213,7 +215,7 @@ def _(mo):
         r"""
             [Regardont le code de ce GPT](https://github.com/huggingface/transformers/blob/v4.25.1/src/transformers/models/gpt2/modeling_gpt2.py#L667)
             """
-        )
+    )
     return
 
 
@@ -226,7 +228,7 @@ def _(mo):
             Dans cette section, nous allons entraîner notre première couche d'embedding sur des critiques de films en français (dataset Allociné) !
             Pour commencer, nous entraînerons uniquement cette couche sur les lettres composant les mots.
             """
-        )
+    )
     return
 
 
@@ -287,7 +289,7 @@ def _(mo):
             ]
             ```
             """
-        )
+    )
     return
 
 
@@ -306,7 +308,7 @@ def _(reviews):
 
     for title in reviews:
         # Nettoie chaque titre pour ne conserver que les lettres (a-z) et les chiffres (0-9)
-        title = re.sub('[^a-zA-Z0-9]+', '', title.lower())
+        title = re.sub("[^a-zA-Z0-9]+", "", title.lower())
 
         # Applique la fonction sliding_window au titre nettoyé et l'ajoute à la liste `window`
         window.append(sliding_window(title))
@@ -347,7 +349,7 @@ def _(mo):
              'y': 14}
             ```
             """
-        )
+    )
     return
 
 
@@ -380,7 +382,7 @@ def _(mo):
         
             Ces deux fonctions garantissent une structure cohérente et standardisée pour interagir avec vos données.
             """
-        )
+    )
     return
 
 
@@ -423,16 +425,16 @@ def _(mo):
     _asset_path = _Path(__file__).parent / "asset"
 
     mo.vstack(
-            [
-                mo.md(
-                    r"""
+        [
+            mo.md(
+                r"""
                         ## Construire le premier modèle d'embedding
                         Nous allons construire un réseau simple pour prédire la lettre suivante.
                             """
-                    ),
-                mo.image(src=_asset_path / "next_letter_prediction.png")
-                ]
-            )
+            ),
+            mo.image(src=_asset_path / "next_letter_prediction.png"),
+        ]
+    )
     return
 
 
@@ -459,23 +461,22 @@ def _(mo):
             ### Visualisation des lettres avant l'entraînement
             Visualisons les embeddings des lettres avant l'entraînement du modèle.
             """
-        )
+    )
     return
 
 
 @app.cell
 def _(NextLetterPrediction, embedding_size_model, mapping, mo):
     model = NextLetterPrediction(
-            vocab_size=len(mapping),
-            embedding_size=embedding_size_model.value
-            )
+        vocab_size=len(mapping), embedding_size=embedding_size_model.value
+    )
     mo.md(
         f"""
     **Modèle créé avec:**
     - Taille du vocabulaire: {len(mapping)}
     - Dimension de l'embedding: {embedding_size_model.value}
     """
-        )
+    )
     return (model,)
 
 
@@ -491,23 +492,25 @@ def _(go, mapping, model, np, torch):
     fig_before = None
     fig_before = go.Figure()
     fig_before.add_trace(
-            go.Scatter(
-                    x=preds[:, 0, 0],
-                    y=preds[:, 0, 1],
-                    mode='text',
-                    text=[translator[idx[0]] for idx in idx_to_calc],
-                    textfont=dict(size=14),
-                    hoverinfo='text',
-                    hovertext=[f"Lettre: {translator[idx[0]]}<br>x: {preds[i, 0, 0]:.3f}<br>y: {preds[i, 0, 1]:.3f}"
-                               for i, idx in enumerate(idx_to_calc)]
-                    )
-            )
+        go.Scatter(
+            x=preds[:, 0, 0],
+            y=preds[:, 0, 1],
+            mode="text",
+            text=[translator[idx[0]] for idx in idx_to_calc],
+            textfont=dict(size=14),
+            hoverinfo="text",
+            hovertext=[
+                f"Lettre: {translator[idx[0]]}<br>x: {preds[i, 0, 0]:.3f}<br>y: {preds[i, 0, 1]:.3f}"
+                for i, idx in enumerate(idx_to_calc)
+            ],
+        )
+    )
     fig_before.update_layout(
-            title="Embeddings avant entraînement",
-            xaxis_title="Dimension 1",
-            yaxis_title="Dimension 2",
-            height=500
-            )
+        title="Embeddings avant entraînement",
+        xaxis_title="Dimension 1",
+        yaxis_title="Dimension 2",
+        height=500,
+    )
     fig_before
     return
 
@@ -520,7 +523,7 @@ def _(mo):
         
             Configurez les hyperparamètres d'entraînement ci-dessous:
             """
-        )
+    )
     return
 
 
@@ -528,57 +531,58 @@ def _(mo):
 def _(mo):
     # Sliders pour les hyperparamètres d'entraînement
     epochs_slider = mo.ui.slider(
-            start=1, stop=10, step=1, value=1,
-            label="Nombre d'époques"
-            )
+        start=1, stop=10, step=1, value=1, label="Nombre d'époques"
+    )
     batch_size_slider = mo.ui.slider(
-            start=32, stop=512, step=32, value=128,
-            label="Taille du batch"
-            )
+        start=32, stop=512, step=32, value=128, label="Taille du batch"
+    )
     learning_rate_slider = mo.ui.slider(
-            start=0.001, stop=0.1, step=0.001, value=0.01,
-            label="Taux d'apprentissage"
-            )
+        start=0.001, stop=0.1, step=0.001, value=0.01, label="Taux d'apprentissage"
+    )
     embedding_size_model = mo.ui.slider(
-            start=2, stop=32, step=1, value=2,
-            label="Dimension embedding (modèle)"
-            )
+        start=2, stop=32, step=1, value=2, label="Dimension embedding (modèle)"
+    )
 
     mo.vstack(
-            [
-                mo.hstack([epochs_slider, batch_size_slider]),
-                mo.hstack([learning_rate_slider, embedding_size_model])
-                ]
-            )
+        [
+            mo.hstack([epochs_slider, batch_size_slider]),
+            mo.hstack([learning_rate_slider, embedding_size_model]),
+        ]
+    )
     return (
         batch_size_slider,
         embedding_size_model,
         epochs_slider,
         learning_rate_slider,
-        )
+    )
 
 
 @app.cell
 def _(
-        NextLetterDataset,
-        batch_size_slider,
-        data,
-        integers_in,
-        integers_out,
-        learning_rate_slider,
-        model,
-        nn,
-        ):
+    NextLetterDataset,
+    batch_size_slider,
+    data,
+    integers_in,
+    integers_out,
+    learning_rate_slider,
+    model,
+    nn,
+):
     # Initialisation du dataset dans le DataLoader avec taille de batch configurable
     dataset = NextLetterDataset(integers_in, integers_out)
-    trainloader = data.DataLoader(dataset, batch_size=batch_size_slider.value, shuffle=True)
+    trainloader = data.DataLoader(
+        dataset, batch_size=batch_size_slider.value, shuffle=True
+    )
 
     # Fonction de perte CrossEntropyLoss pour classification multi-classes
     criterion = nn.CrossEntropyLoss()
 
     # Optimiseur AdamW avec taux d'apprentissage configurable
     import torch as torch_optim
-    optimizer = torch_optim.optim.AdamW(model.parameters(), lr=learning_rate_slider.value)
+
+    optimizer = torch_optim.optim.AdamW(
+        model.parameters(), lr=learning_rate_slider.value
+    )
     return criterion, optimizer, trainloader
 
 
@@ -591,15 +595,15 @@ def _(mo):
 
 @app.cell
 def _(
-        criterion,
-        epochs_slider,
-        mo,
-        model,
-        optimizer,
-        run_button,
-        torch,
-        trainloader,
-        ):
+    criterion,
+    epochs_slider,
+    mo,
+    model,
+    optimizer,
+    run_button,
+    torch,
+    trainloader,
+):
     mo.stop(not run_button.value, mo.md("Click 👆 to run this cell"))
     # Vérifie si un GPU CUDA est disponible ; sinon, utilise le CPU.
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -642,7 +646,7 @@ def _(
     - Époques: {epochs_slider.value}
     - Perte finale: {loss_history[-1]:.4f}
     """
-        )
+    )
     return device, loss_history, model_train
 
 
@@ -651,21 +655,21 @@ def _(go, loss_history, mo):
     # Graphique de l'historique des pertes
     fig_loss = go.Figure()
     fig_loss.add_trace(
-            go.Scatter(
-                    x=list(range(1, len(loss_history) + 1)),
-                    y=loss_history,
-                    mode='lines+markers',
-                    name='Perte',
-                    line=dict(color='blue', width=2),
-                    marker=dict(size=8)
-                    )
-            )
+        go.Scatter(
+            x=list(range(1, len(loss_history) + 1)),
+            y=loss_history,
+            mode="lines+markers",
+            name="Perte",
+            line=dict(color="blue", width=2),
+            marker=dict(size=8),
+        )
+    )
     fig_loss.update_layout(
-            title="Évolution de la perte pendant l'entraînement",
-            xaxis_title="Époque",
-            yaxis_title="Perte moyenne",
-            height=400
-            )
+        title="Évolution de la perte pendant l'entraînement",
+        xaxis_title="Époque",
+        yaxis_title="Perte moyenne",
+        height=400,
+    )
     mo.vstack([mo.md("### Courbe d'apprentissage"), fig_loss])
     return
 
@@ -676,36 +680,37 @@ def _(device, go, mapping, mo, model_train, np, torch):
     idx_to_calc_after = np.array([idx_to_calc_after]).T
 
     translator_after = {v: k for k, v in mapping.items()}
-    preds_after = model_train.embedding(torch.tensor(idx_to_calc_after).to(device)).cpu().detach().numpy()
+    preds_after = (
+        model_train.embedding(torch.tensor(idx_to_calc_after).to(device))
+        .cpu()
+        .detach()
+        .numpy()
+    )
 
     # Graphique Plotly interactif pour les embeddings après entraînement
     fig_after = go.Figure()
     fig_after.add_trace(
-            go.Scatter(
-                    x=preds_after[:, 0, 0],
-                    y=preds_after[:, 0, 1],
-                    mode='text+markers',
-                    text=[translator_after[idx[0]] for idx in idx_to_calc_after],
-                    textfont=dict(size=14),
-                    marker=dict(size=10, opacity=0.6),
-                    hoverinfo='text',
-                    hovertext=[
-                        f"Lettre: {translator_after[idx[0]]}<br>x: {preds_after[i, 0, 0]:.3f}<br>y: {preds_after[i, 0, 1]:.3f}"
-                        for i, idx in enumerate(idx_to_calc_after)]
-                    )
-            )
+        go.Scatter(
+            x=preds_after[:, 0, 0],
+            y=preds_after[:, 0, 1],
+            mode="text+markers",
+            text=[translator_after[idx[0]] for idx in idx_to_calc_after],
+            textfont=dict(size=14),
+            marker=dict(size=10, opacity=0.6),
+            hoverinfo="text",
+            hovertext=[
+                f"Lettre: {translator_after[idx[0]]}<br>x: {preds_after[i, 0, 0]:.3f}<br>y: {preds_after[i, 0, 1]:.3f}"
+                for i, idx in enumerate(idx_to_calc_after)
+            ],
+        )
+    )
     fig_after.update_layout(
-            title="Embeddings après entraînement",
-            xaxis_title="Dimension 1",
-            yaxis_title="Dimension 2",
-            height=500
-            )
-    mo.vstack(
-            [
-                mo.md("### Visualisation des embeddings appris"),
-                fig_after
-                ]
-            )
+        title="Embeddings après entraînement",
+        xaxis_title="Dimension 1",
+        yaxis_title="Dimension 2",
+        height=500,
+    )
+    mo.vstack([mo.md("### Visualisation des embeddings appris"), fig_after])
     return
 
 
@@ -717,7 +722,7 @@ def _(mo):
         
             Utilisez les champs ci-dessous pour comparer la similarité sémantique entre deux mots français.
             """
-        )
+    )
     return
 
 
@@ -780,7 +785,7 @@ def _(F, mo, torch, word1_input, word2_input):
 
     > **Conseil:** Essayez des paires comme "chat/chien", "paris/france", "heureux/triste", "manger/boire"
     """
-        )
+    )
     return
 
 

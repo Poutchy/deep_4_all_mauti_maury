@@ -13,14 +13,19 @@ from pathlib import Path
 
 import torch
 import torch.nn as nn
-from leaderboard_base import (LeaderboardApp, LeaderboardConfig,
-                              ModelEvaluator, compute_metrics)
+from leaderboard_base import (
+    LeaderboardApp,
+    LeaderboardConfig,
+    ModelEvaluator,
+    compute_metrics,
+)
 from torch.utils.data import DataLoader
 from train_dungeon_logs import DungeonLogDataset
 
 # =============================================================================
 # Évaluateur spécifique Dungeon
 # =============================================================================
+
 
 class DungeonEvaluator(ModelEvaluator):
     """Évaluateur pour le dataset Dungeon (séquences)."""
@@ -30,19 +35,14 @@ class DungeonEvaluator(ModelEvaluator):
         self.batch_size = batch_size
 
         # Charger le vocabulaire pour connaître sa taille
-        with open(vocab_path, 'r', encoding='utf-8') as f:
+        with open(vocab_path, "r", encoding="utf-8") as f:
             self.vocab = json.load(f)
         self.vocab_size = len(self.vocab)
 
     def evaluate(self, model: nn.Module, data_path: str) -> dict:
         """Évalue un modèle sur le dataset Dungeon."""
-        dataset = DungeonLogDataset(
-            data_path,
-            vocab_path=self.vocab_path
-        )
-        dataloader = DataLoader(dataset,
-                                batch_size=self.batch_size,
-                                shuffle=False)
+        dataset = DungeonLogDataset(data_path, vocab_path=self.vocab_path)
+        dataloader = DataLoader(dataset, batch_size=self.batch_size, shuffle=False)
 
         all_predictions = []
         all_labels = []
@@ -124,7 +124,7 @@ Le dataset contient des séquences d'événements de donjon :
 
 ---
 *Survivrez-vous aux Archives Interdites ?*
-    """
+    """,
 )
 
 
@@ -140,8 +140,6 @@ if __name__ == "__main__":
         print("    Exécutez d'abord: python solution/dungeon_logs.py")
         exit(1)
 
-    evaluator = DungeonEvaluator(
-        vocab_path=str(vocab_path)
-    )
+    evaluator = DungeonEvaluator(vocab_path=str(vocab_path))
     app = LeaderboardApp(CONFIG, evaluator)
     app.launch(share=False)

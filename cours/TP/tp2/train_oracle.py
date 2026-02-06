@@ -28,6 +28,7 @@ from torch.utils.data import DataLoader, Dataset
 # Dataset PyTorch
 # ============================================================================
 
+
 class AdventurerDataset(Dataset):
     """Dataset des aventuriers de la Guilde."""
 
@@ -40,8 +41,8 @@ class AdventurerDataset(Dataset):
         self.df = pd.read_csv(csv_path)
 
         # Séparer features et labels
-        self.labels = torch.tensor(self.df['survie'].values, dtype=torch.float32)
-        self.features = self.df.drop('survie', axis=1).values
+        self.labels = torch.tensor(self.df["survie"].values, dtype=torch.float32)
+        self.features = self.df.drop("survie", axis=1).values
 
         # Normalisation des data
         if normalize:
@@ -61,6 +62,7 @@ class AdventurerDataset(Dataset):
 # ============================================================================
 # Boucle d'entraînement
 # ============================================================================
+
 
 def train_epoch(model, dataloader, criterion, optimizer, device):
     """Entraîne le modèle pour une epoch."""
@@ -116,9 +118,10 @@ def evaluate(model, dataloader, criterion, device):
 # Fonction principale
 # ============================================================================
 
+
 def main(args):
     # Device
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Device: {device}")
 
     # Chemins
@@ -129,25 +132,15 @@ def main(args):
     # Charger les données
     print("\nChargement des données...")
     train_dataset = AdventurerDataset(
-            str(data_dir / "train.csv"),
-            normalize=args.normalize
-            )
-    val_dataset = AdventurerDataset(
-            str(data_dir / "val.csv"),
-            normalize=args.normalize
-            )
+        str(data_dir / "train.csv"), normalize=args.normalize
+    )
+    val_dataset = AdventurerDataset(str(data_dir / "val.csv"), normalize=args.normalize)
 
     # DataLoaders
     train_loader = DataLoader(
-            train_dataset,
-            batch_size=args.batch_size,
-            shuffle=args.shuffle
-            )
-    val_loader = DataLoader(
-            val_dataset,
-            batch_size=args.batch_size,
-            shuffle=False
-            )
+        train_dataset, batch_size=args.batch_size, shuffle=args.shuffle
+    )
+    val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False)
 
     print(f"Train: {len(train_dataset)} échantillons")
     print(f"Val: {len(val_dataset)} échantillons")
@@ -155,36 +148,30 @@ def main(args):
     # Modèle
     print("\nCréation du modèle...")
     model = GuildOracle(
-            input_dim=train_dataset.features.shape[1],
-            hidden_dim=args.hidden_dim
-            )
+        input_dim=train_dataset.features.shape[1], hidden_dim=args.hidden_dim
+    )
     model = model.to(device)
     print(f"Paramètres: {count_parameters(model):,}")
 
     # Loss et optimiseur
     criterion = nn.BCEWithLogitsLoss()
 
-    if args.optimizer == 'adam':
+    if args.optimizer == "adam":
         optimizer = optim.Adam(
-                model.parameters(),
-                lr=args.learning_rate,
-                weight_decay=args.weight_decay
-                )
+            model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay
+        )
     else:
         optimizer = optim.SGD(
-                model.parameters(),
-                lr=args.learning_rate,
-                momentum=0.9,
-                weight_decay=args.weight_decay
-                )
+            model.parameters(),
+            lr=args.learning_rate,
+            momentum=0.9,
+            weight_decay=args.weight_decay,
+        )
 
     print(f"Optimiseur: {args.optimizer.upper()}, LR: {args.learning_rate}")
 
     # Historique
-    history = {
-        'train_loss': [], 'train_acc': [],
-        'val_loss':   [], 'val_acc': []
-        }
+    history = {"train_loss": [], "train_acc": [], "val_loss": [], "val_acc": []}
 
     # Entraînement
     print("\n" + "=" * 50)
@@ -197,24 +184,24 @@ def main(args):
     for epoch in range(args.epochs):
         # Train
         train_loss, train_acc = train_epoch(
-                model, train_loader, criterion, optimizer, device
-                )
+            model, train_loader, criterion, optimizer, device
+        )
 
         # Validation
         val_loss, val_acc = evaluate(model, val_loader, criterion, device)
 
         # Historique
-        history['train_loss'].append(train_loss)
-        history['train_acc'].append(train_acc)
-        history['val_loss'].append(val_loss)
-        history['val_acc'].append(val_acc)
+        history["train_loss"].append(train_loss)
+        history["train_acc"].append(train_acc)
+        history["val_loss"].append(val_loss)
+        history["val_acc"].append(val_acc)
 
         # Affichage
         print(
-                f"Epoch {epoch + 1:3d}/{args.epochs} | "
-                f"Train Loss: {train_loss:.4f} | Train Acc: {train_acc:.2%} | "
-                f"Val Loss: {val_loss:.4f} | Val Acc: {val_acc:.2%}"
-                )
+            f"Epoch {epoch + 1:3d}/{args.epochs} | "
+            f"Train Loss: {train_loss:.4f} | Train Acc: {train_acc:.2%} | "
+            f"Val Loss: {val_loss:.4f} | Val Acc: {val_acc:.2%}"
+        )
 
         # Sauvegarder le meilleur modèle (modele complet pour supporter architectures custom)
         if val_acc > best_val_acc:
@@ -234,11 +221,11 @@ def main(args):
     print(f"Modèle sauvegardé: {checkpoint_dir / 'best_model.pt'}")
     print("=" * 50)
 
-    with open(checkpoint_dir / "history.json", 'w') as f:
+    with open(checkpoint_dir / "history.json", "w") as f:
         json.dump(history, f, indent=4)
 
     # Analyse de l'overfitting
-    gap = history['train_acc'][-1] - history['val_acc'][-1]
+    gap = history["train_acc"][-1] - history["val_acc"][-1]
     print(f"\nGap Train-Val (dernière epoch): {gap:.2%}")
     if gap > 0.10:
         print("ATTENTION: Gap important ! Risque d'overfitting.")
@@ -258,20 +245,20 @@ def plot_history(history, save_path):
     fig, axes = plt.subplots(1, 2, figsize=(12, 4))
 
     # Loss
-    axes[0].plot(history['train_loss'], label='Train')
-    axes[0].plot(history['val_loss'], label='Validation')
-    axes[0].set_xlabel('Epoch')
-    axes[0].set_ylabel('Loss')
-    axes[0].set_title('Loss au cours de l\'entraînement')
+    axes[0].plot(history["train_loss"], label="Train")
+    axes[0].plot(history["val_loss"], label="Validation")
+    axes[0].set_xlabel("Epoch")
+    axes[0].set_ylabel("Loss")
+    axes[0].set_title("Loss au cours de l'entraînement")
     axes[0].legend()
     axes[0].grid(True)
 
     # Accuracy
-    axes[1].plot(history['train_acc'], label='Train')
-    axes[1].plot(history['val_acc'], label='Validation')
-    axes[1].set_xlabel('Epoch')
-    axes[1].set_ylabel('Accuracy')
-    axes[1].set_title('Accuracy au cours de l\'entraînement')
+    axes[1].plot(history["train_acc"], label="Train")
+    axes[1].plot(history["val_acc"], label="Validation")
+    axes[1].set_xlabel("Epoch")
+    axes[1].set_ylabel("Accuracy")
+    axes[1].set_title("Accuracy au cours de l'entraînement")
     axes[1].legend()
     axes[1].grid(True)
 
@@ -281,62 +268,61 @@ def plot_history(history, save_path):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Entraînement de l'Oracle de la Guilde")
+    parser = argparse.ArgumentParser(
+        description="Entraînement de l'Oracle de la Guilde"
+    )
 
     # Données
     parser.add_argument(
-            '--normalize', action='store_true', default=False,
-            help='Normaliser les features'
-            )
+        "--normalize",
+        action="store_true",
+        default=False,
+        help="Normaliser les features",
+    )
     parser.add_argument(
-            '--shuffle', action='store_true', default=False,
-            help='Mélanger les données'
-            )
+        "--shuffle", action="store_true", default=False, help="Mélanger les données"
+    )
 
     # Modèle
     parser.add_argument(
-            '--hidden_dim', type=int, default=256,
-            help='Dimension des couches cachées'
-            )
+        "--hidden_dim", type=int, default=256, help="Dimension des couches cachées"
+    )
 
     # Entraînement
+    parser.add_argument("--epochs", type=int, default=5, help="Nombre d'epochs")
+    parser.add_argument("--batch_size", type=int, default=32, help="Taille du batch")
     parser.add_argument(
-            '--epochs', type=int, default=5,
-            help='Nombre d\'epochs'
-            )
+        "--learning_rate", type=float, default=0.1, help="Learning rate"
+    )
     parser.add_argument(
-            '--batch_size', type=int, default=32,
-            help='Taille du batch'
-            )
+        "--optimizer",
+        type=str,
+        default="adam",
+        choices=["adam", "sgd"],
+        help="Optimiseur",
+    )
     parser.add_argument(
-            '--learning_rate', type=float, default=0.1,
-            help='Learning rate'
-            )
-    parser.add_argument(
-            '--optimizer', type=str, default='adam',
-            choices=['adam', 'sgd'],
-            help='Optimiseur'
-            )
-    parser.add_argument(
-            '--weight_decay', type=float, default=0.0,
-            help='Weight decay (L2 regularization)'
-            )
+        "--weight_decay",
+        type=float,
+        default=0.0,
+        help="Weight decay (L2 regularization)",
+    )
 
     # Early stopping
     parser.add_argument(
-            '--early_stopping', action='store_true', default=False,
-            help='Activer early stopping'
-            )
+        "--early_stopping",
+        action="store_true",
+        default=False,
+        help="Activer early stopping",
+    )
     parser.add_argument(
-            '--patience', type=int, default=10,
-            help='Patience pour early stopping'
-            )
+        "--patience", type=int, default=10, help="Patience pour early stopping"
+    )
 
     # Autres
     parser.add_argument(
-            '--plot', action='store_true', default=True,
-            help='Afficher les courbes'
-            )
+        "--plot", action="store_true", default=True, help="Afficher les courbes"
+    )
 
     args = parser.parse_args()
 

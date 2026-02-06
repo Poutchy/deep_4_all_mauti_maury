@@ -1,22 +1,27 @@
 from accelerate import notebook_launcher
 from datasets import load_dataset
-from transformers import (AutoModelForCausalLM, AutoTokenizer,
-                          PreTrainedTokenizerFast, TrainingArguments)
+from transformers import (
+    AutoModelForCausalLM,
+    AutoTokenizer,
+    PreTrainedTokenizerFast,
+    TrainingArguments,
+)
 from trl import DataCollatorForCompletionOnlyLM, SFTTrainer
 
 # transformers/models/opt/modeling_opt.py:OPTForCausalLM:forward
-model = AutoModelForCausalLM.from_pretrained("facebook/opt-350m",
-                                             device_map="cuda")
+model = AutoModelForCausalLM.from_pretrained("facebook/opt-350m", device_map="cuda")
 
 tokenizer: PreTrainedTokenizerFast = AutoTokenizer.from_pretrained("facebook/opt-350m")
 
 dataset = load_dataset("timdettmers/openassistant-guanaco", split="train")
 dataset = dataset.train_test_split(test_size=0.999)["train"]
 
-collator = DataCollatorForCompletionOnlyLM(instruction_template="### Human:",
-                                           response_template="### Assistant:",
-                                           ignore_index=tokenizer.pad_token_id,
-                                           tokenizer=tokenizer)
+collator = DataCollatorForCompletionOnlyLM(
+    instruction_template="### Human:",
+    response_template="### Assistant:",
+    ignore_index=tokenizer.pad_token_id,
+    tokenizer=tokenizer,
+)
 
 dataset_text_field = "text"
 learning_rate = 1.41e-5

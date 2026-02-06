@@ -12,14 +12,19 @@ from pathlib import Path
 
 import torch
 import torch.nn as nn
-from leaderboard_base import (LeaderboardApp, LeaderboardConfig,
-                              ModelEvaluator, compute_metrics)
+from leaderboard_base import (
+    LeaderboardApp,
+    LeaderboardConfig,
+    ModelEvaluator,
+    compute_metrics,
+)
 from torch.utils.data import DataLoader
 from train_oracle import AdventurerDataset
 
 # =============================================================================
 # Évaluateur spécifique Oracle
 # =============================================================================
+
 
 class OracleEvaluator(ModelEvaluator):
     """Évaluateur pour le dataset Oracle (features tabulaires)."""
@@ -105,7 +110,7 @@ La cible est `survie` (0 = échec, 1 = survie).
 
 ---
 *Que la chance soit avec vous, jeune Oracle !*
-    """
+    """,
 )
 
 

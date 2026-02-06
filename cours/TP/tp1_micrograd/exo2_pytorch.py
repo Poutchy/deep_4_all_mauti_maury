@@ -40,7 +40,9 @@ L_pt.backward()
 
 print(f"\nResultats :")
 print(f"Micrograd :: L={L_mg.data:.4f} | dL/da={a_mg.grad:.4f} | dL/db={b_mg.grad:.4f}")
-print(f"PyTorch   :: L={L_pt.item():.4f} | dL/da={a_pt.grad.item():.4f} | dL/db={b_pt.grad.item():.4f}")
+print(
+    f"PyTorch   :: L={L_pt.item():.4f} | dL/da={a_pt.grad.item():.4f} | dL/db={b_pt.grad.item():.4f}"
+)
 
 if abs(a_mg.grad - a_pt.grad.item()) < 1e-4:
     print("\n SUCCES : Votre moteur calcule exactement comme PyTorch !")

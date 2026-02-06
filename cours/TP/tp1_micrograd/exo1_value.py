@@ -27,9 +27,9 @@ print("=" * 80)
 print("Objectif : Calculer dL/da et dL/db pour l'expression L = a * b + c")
 
 # 1. Definition des entrees
-a = Value(2.0, _op_symbol='a')
-b = Value(-3.0, _op_symbol='b')
-c = Value(10.0, _op_symbol='c')
+a = Value(2.0, _op_symbol="a")
+b = Value(-3.0, _op_symbol="b")
+c = Value(10.0, _op_symbol="c")
 
 # 2. Construction du graphe (Forward Pass)
 e = a * b  # e = -6
