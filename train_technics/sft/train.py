@@ -1,7 +1,8 @@
-from datasets import load_dataset
-from transformers import AutoModelForCausalLM, TrainingArguments, AutoTokenizer, PreTrainedTokenizerFast
-from trl import SFTTrainer, DataCollatorForCompletionOnlyLM
 from accelerate import notebook_launcher
+from datasets import load_dataset
+from transformers import (AutoModelForCausalLM, AutoTokenizer,
+                          PreTrainedTokenizerFast, TrainingArguments)
+from trl import DataCollatorForCompletionOnlyLM, SFTTrainer
 
 # transformers/models/opt/modeling_opt.py:OPTForCausalLM:forward
 model = AutoModelForCausalLM.from_pretrained("facebook/opt-350m",

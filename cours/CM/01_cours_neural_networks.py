@@ -79,8 +79,8 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    import numpy as np
     import matplotlib.pyplot as plt
+    import numpy as np
 
     def plot_interactive_neuron(w1, w2, b):
         fig, ax = plt.subplots(1, 1, figsize=(8, 6))

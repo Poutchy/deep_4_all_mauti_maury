@@ -39,13 +39,14 @@ def _(mo):
 
 @app.cell
 def _():
+    import pathlib
+
+    import numpy as np
+    import plotly.graph_objects as go
     import torch
     import torch.nn as nn
     import torch.nn.functional as F
-    import numpy as np
-    import plotly.graph_objects as go
     from plotly.subplots import make_subplots
-    import pathlib
     torch.cuda.is_available()
     return F, go, make_subplots, nn, np, pathlib, torch
 
@@ -1263,8 +1264,8 @@ def _(mo):
 
 @app.cell
 def _():
-    from datasets import load_dataset
     import torch.utils.data as data_utils
+    from datasets import load_dataset
 
     allocine = load_dataset("allocine", split="train[:3000]")
     allocine_test = load_dataset("allocine", split="test[:500]")

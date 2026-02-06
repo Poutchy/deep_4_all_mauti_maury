@@ -57,13 +57,13 @@ def _(mo):
 
 @app.cell
 def _():
+    import numpy as np
+    import pandas as pd
+    import plotly.graph_objects as go
     import torch
     import torch.nn as nn
     import torch.nn.functional as F
     import torch.utils.data as data
-    import pandas as pd
-    import numpy as np
-    import plotly.graph_objects as go
     return F, data, go, nn, np, pd, torch
 
 
@@ -190,7 +190,7 @@ def _(mo):
 
 @app.cell
 def _():
-    from transformers import GPT2Tokenizer, GPT2Model
+    from transformers import GPT2Model, GPT2Tokenizer
 
     tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
     gpt_model = GPT2Model.from_pretrained("gpt2")

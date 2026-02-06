@@ -13,15 +13,10 @@ from pathlib import Path
 
 import torch
 import torch.nn as nn
+from leaderboard_base import (LeaderboardApp, LeaderboardConfig,
+                              ModelEvaluator, compute_metrics)
 from torch.utils.data import DataLoader
 from train_dungeon_logs import DungeonLogDataset
-
-from leaderboard_base import (
-    LeaderboardApp,
-    LeaderboardConfig,
-    ModelEvaluator,
-    compute_metrics
-)
 
 # =============================================================================
 # Évaluateur spécifique Dungeon

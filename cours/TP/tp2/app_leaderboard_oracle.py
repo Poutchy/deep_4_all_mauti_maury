@@ -12,16 +12,10 @@ from pathlib import Path
 
 import torch
 import torch.nn as nn
+from leaderboard_base import (LeaderboardApp, LeaderboardConfig,
+                              ModelEvaluator, compute_metrics)
 from torch.utils.data import DataLoader
-
-from leaderboard_base import (
-    LeaderboardApp,
-    LeaderboardConfig,
-    ModelEvaluator,
-    compute_metrics
-)
 from train_oracle import AdventurerDataset
-
 
 # =============================================================================
 # Évaluateur spécifique Oracle
