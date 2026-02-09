@@ -156,17 +156,17 @@ def main(args):
     # Loss et optimiseur
     criterion = nn.BCEWithLogitsLoss()
 
-    if args.optimizer == "adam":
-        optimizer = optim.Adam(
-            model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay
-        )
-    else:
-        optimizer = optim.SGD(
-            model.parameters(),
-            lr=args.learning_rate,
-            momentum=0.9,
-            weight_decay=args.weight_decay,
-        )
+    # if args.optimizer == "adam":
+    adam = optim.Adam(
+        model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay
+    )
+    # else:
+    sgd = optim.SGD(
+        model.parameters(),
+        lr=args.learning_rate,
+        momentum=0.9,
+        weight_decay=args.weight_decay,
+    )
 
     print(f"Optimiseur: {args.optimizer.upper()}, LR: {args.learning_rate}")
 
@@ -183,6 +183,9 @@ def main(args):
 
     for epoch in range(args.epochs):
         # Train
+        optimizer = sgd
+        if epoch <= 5:
+            optimizer = adam
         train_loss, train_acc = train_epoch(
             model, train_loader, criterion, optimizer, device
         )
