@@ -266,6 +266,7 @@ if __name__ == "__main__":
         iteration = formated_teacher[i]
         student = {
             "instruction": iteration.question,
+            "input": "",
             "output": iteration.content,
         }
         if iteration.high % 2:
@@ -280,12 +281,12 @@ if __name__ == "__main__":
         for obj in [f for f in formated_teacher if not f.high % 2]:
             out.write(dumps(obj, cls=EnhancedJSONEncoder) + "\n")
 
-    # kept_basse = [t for t in sample(basse, 500)]
-    # with open(OUTPUT_KEEP_B_FILE, "w", encoding="utf-8") as out:
-    #     for obj in kept_basse:
-    #         out.write(dumps(obj, cls=EnhancedJSONEncoder) + "\n")
+    kept_basse = [t for t in sample(basse, 500)]
+    with open(OUTPUT_KEEP_B_FILE, "w", encoding="utf-8") as out:
+        for obj in kept_basse:
+            out.write(dumps(obj, cls=EnhancedJSONEncoder) + "\n")
     
-    # kept_haute = [t for t in sample(haute, 500)]
-    # with open(OUTPUT_KEEP_H_FILE, "w", encoding="utf-8") as out:
-    #     for obj in kept_basse:
-    #         out.write(dumps(obj, cls=EnhancedJSONEncoder) + "\n")
+    kept_haute = [t for t in sample(haute, 500)]
+    with open(OUTPUT_KEEP_H_FILE, "w", encoding="utf-8") as out:
+        for obj in kept_basse:
+            out.write(dumps(obj, cls=EnhancedJSONEncoder) + "\n")
