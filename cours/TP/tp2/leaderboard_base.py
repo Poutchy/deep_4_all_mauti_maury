@@ -131,8 +131,7 @@ class LeaderboardDB:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        cursor.execute(
-            f"""
+        cursor.execute(f"""
             CREATE TABLE IF NOT EXISTS {self.table_name}
             (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -146,15 +145,12 @@ class LeaderboardDB:
                 submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 is_best INTEGER DEFAULT 0
             )
-        """
-        )
+        """)
 
-        cursor.execute(
-            f"""
+        cursor.execute(f"""
             CREATE INDEX IF NOT EXISTS idx_{self.table_name}_team_name
             ON {self.table_name}(team_name)
-        """
-        )
+        """)
 
         conn.commit()
         conn.close()
@@ -527,12 +523,10 @@ class LeaderboardApp:
         self.db.init_database()
 
         with gr.Blocks(title=self.config.title, theme=gr.themes.Soft()) as app:
-            gr.Markdown(
-                f"""
+            gr.Markdown(f"""
 # {self.config.title}
 ### {self.config.description}
-            """
-            )
+            """)
 
             with gr.Tabs():
                 # Tab 1: Soumission

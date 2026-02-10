@@ -13,8 +13,7 @@ def _():
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
     # Reseaux de Neurones : De la Theorie a la Pratique
 
     ## Master 2 Informatique - Introduction a l'IA
@@ -29,15 +28,13 @@ def _(mo):
     4. **Backpropagation** - La regle de la chaine en action
     5. **Multi-Layer Perceptron (MLP)** - Architecture profonde
     6. **Demo Interactive** - Micrograd en pratique
-    """
-    )
+    """)
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
     ---
     ## 1. Le Neurone Artificiel
 
@@ -46,15 +43,13 @@ def _(mo):
     Le neurone biologique recoit des signaux electriques via ses **dendrites**,
     les integre dans le **corps cellulaire**, et si le signal depasse un seuil,
     transmet une impulsion via son **axone**.
-    """
-    )
+    """)
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
     ### Le modele mathematique
 
     Le neurone artificiel (perceptron) imite ce comportement :
@@ -67,22 +62,19 @@ def _(mo):
     - $b$ : biais (seuil d'activation)
     - $f$ : fonction d'activation (decision de "tirer" ou non)
     - $y$ : sortie du neurone
-    """
-    )
+    """)
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
     ### 🕹️ Labo Interactif : La Frontière de Décision
 
     Jouez avec les paramètres pour comprendre leur rôle géométrique :
     - **$w_1$ et $w_2$** : Ils déterminent l'**angle** (la rotation) de la ligne.
     - **$b$ (Biais)** : Il détermine la **position** (le décalage) de la ligne par rapport à l'origine.
-    """
-    )
+    """)
     return
 
 
@@ -189,8 +181,7 @@ def _(b_slider, plot_interactive_neuron, w1_slider, w2_slider):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
     ---
     ## 2. Fonctions d'Activation
 
@@ -202,8 +193,7 @@ def _(mo):
     $$f(g(x)) = W_2(W_1 x) = (W_2 W_1) x = W' x$$
 
     La non-linearite permet d'apprendre des frontieres de decision complexes !
-    """
-    )
+    """)
     return
 
 
@@ -276,8 +266,7 @@ def _(plot_activations):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
     ### Comparaison des fonctions d'activation
 
     | Fonction | Avantages | Inconvenients |
@@ -287,15 +276,13 @@ def _(mo):
     | **ReLU** | Simple, pas de vanishing gradient | "Dying ReLU" (neurones morts) |
     | **Leaky ReLU** | Evite les neurones morts | Hyperparametre supplementaire |
     | **GELU/SiLU** | Smooth, performant en pratique | Plus couteux a calculer |
-    """
-    )
+    """)
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
     ---
     ## 3. Descente de Gradient
 
@@ -308,15 +295,13 @@ def _(mo):
     **Idee intuitive** : Imaginez-vous sur une montagne dans le brouillard.
     Pour descendre, vous tatez le sol autour de vous et avancez dans la direction
     qui descend le plus.
-    """
-    )
+    """)
     return
 
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
     ### 📉 L'algorithme de Descente de Gradient
 
     L'objectif est de minimiser la fonction de coût $\mathcal{L}(\mathbf{w})$.
@@ -338,8 +323,7 @@ def _(mo):
     | $\mathcal{L}$ | **Fonction de coût** | (*Loss function*) Mesure l'erreur entre la prédiction et la réalité. |
     | $\nabla$ | **Gradient** | Vecteur indiquant la direction de la pente la plus raide. |
     | $\partial$ | **Dérivée partielle** | Variation de l'erreur par rapport à un seul poids spécifique. |
-    """
-    )
+    """)
     return
 
 
@@ -454,8 +438,7 @@ def _(plot_gradient_descent):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
     ### 🕹️ Labo Interactif : Jouez avec le Learning Rate !
 
     Essayez de modifier le **taux d'apprentissage** ($\eta$) ci-dessous.
@@ -463,8 +446,7 @@ def _(mo):
     - **$\eta \approx 0.3$** : Convergence rapide.
     - **$\eta > 0.9$** : Oscillations.
     - **$\eta > 1.0$** : Explosion (Divergence) !
-    """
-    )
+    """)
     return
 
 
@@ -541,8 +523,7 @@ def _(lr_slider, mo, np, plt, step_slider):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
     ---
     ## 4. 🧠 Backpropagation : La Règle de la Chaîne
 
@@ -625,15 +606,13 @@ def _(mo):
     | ReLU avec entrée < 0 | $0$ | Gradient bloqué ("neurone mort") |
     | Sigmoid saturée (entrée très grande) | $\approx 0$ | Gradient qui s'évanouit |
     | Connexion résiduelle ($y = x + f(x)$) | $1 + f'(x)$ | Gradient préservé (au moins 1) |
-    """
-    )
+    """)
     return
 
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
     ### 🔍 Backpropagation en Action
 
     Prenons un exemple concret : $L = (w \cdot x - y)^2$
@@ -728,8 +707,7 @@ def _(mo):
     **Mise à jour du poids :** $w_{\text{nouveau}} = w - \eta \cdot \frac{\partial L}{\partial w}$
 
     où $\eta$ est le *learning rate* (taux d'apprentissage).
-    """
-    )
+    """)
     return
 
 
@@ -862,8 +840,7 @@ def _(plot_computational_graph_improved):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
     ### ⚠️ Note cruciale : L'Accumulation (`+=`)
 
     Que se passe-t-il si une variable est utilisée **plusieurs fois** ?
@@ -874,8 +851,7 @@ def _(mo):
     * Code : C'est pour ça qu'on utilise `self.grad += ...` et non `=`.
 
     Si $x$ influence la perte via deux chemins différents, on doit additionner l'urgence venant des deux chemins pour connaître l'urgence totale sur $x$.
-    """
-    )
+    """)
     return
 
 

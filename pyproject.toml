@@ -25,6 +25,7 @@ dependencies = [
     "transformers>=4.57.5",
     "torch",
     "torchvision",
+    "nltk>=3.9.2",
 ]
 
 [project.optional-dependencies]

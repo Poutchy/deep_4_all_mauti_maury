@@ -13,8 +13,7 @@ def _():
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
             # Reseaux de Neurones Recurrents (RNN) et LSTM
         
             Les **RNN** et **LSTM** sont des architectures concues pour traiter des **donnees sequentielles** : texte, series temporelles, audio, video...
@@ -33,8 +32,7 @@ def _(mo):
             Un RNN maintient un **etat cache** (hidden state) $h_t$ qui accumule l'information :
             - A chaque pas $t$ : le reseau recoit l'entree $x_t$ ET l'etat precedent $h_{t-1}$
             - L'etat cache agit comme une **memoire** des entrees passees
-            """
-    )
+            """)
     return
 
 
@@ -83,8 +81,7 @@ def _(abs_path_asset, mo, step):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
             ---
         
             # 1. RNN Simple : Theorie et Implementation
@@ -104,20 +101,17 @@ def _(mo):
             | $W_{xh}$ | `(hidden_size, input_size)` | Poids entree → cache |
             | $W_{hh}$ | `(hidden_size, hidden_size)` | Poids cache → cache (recurrence) |
             | $b_h$ | `(hidden_size,)` | Biais |
-            """
-    )
+            """)
     return
 
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
             ## Implementation manuelle vs PyTorch
         
             Voyons comment implementer la formule $h_t = \tanh(W_{xh} \cdot x_t + W_{hh} \cdot h_{t-1} + b_h)$ :
-            """
-    )
+            """)
     return
 
 
@@ -173,13 +167,11 @@ def _(nn, torch):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
             ## Traitement d'une sequence complete
         
             Pour une sequence $[x_1, x_2, ..., x_T]$, on applique la meme formule a chaque pas :
-            """
-    )
+            """)
     return
 
 
@@ -221,11 +213,9 @@ def _(nn, torch):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
             ## Visualisation : Evolution de l'etat cache
-            """
-    )
+            """)
     return
 
 
@@ -315,8 +305,7 @@ def _(go, hidden_size_demo, make_subplots, mo, nn, np, sequence_input, torch):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
             ---
         
             # 2. Le Probleme du Vanishing Gradient
@@ -334,8 +323,7 @@ def _(mo):
             Le réseau devient "amnésique" des premiers instants.
         
             > Un Vanishing Gradient (gradient proche de zéro) signifie que le réseau met à jour ses poids uniquement en fonction des erreurs récentes. Concrètement, le début de la séquence n'a plus aucun impact sur l'apprentissage : le réseau devient amnésique aux événements passés.
-            """
-    )
+            """)
     return
 
 
@@ -406,13 +394,11 @@ def _(go, mo, np):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
             ## Demonstration : le gradient disparait
         
             Visualisons le gradient qui remonte dans le temps :
-            """
-    )
+            """)
     return
 
 
@@ -570,16 +556,14 @@ def _(get_gradient_norms, go, mo, slider_seq):
                 mo.md("### 📉 Analyse Dynamique"),
                 viz_fig,
                 mo.callout(
-                    mo.md(
-                        f"""
+                    mo.md(f"""
                 **Diagnostic :**
             
                 * **RNN (Ligne Rouge)** : Ratio Début/Fin = **{viz_ratio_rnn:.2e}**.
                     * Le gradient chute drastiquement. Le réseau ne peut pas apprendre les liens entre le début ($t=0$) et la fin ($t={viz_seq_len}$).
                 * **LSTM (Ligne Verte)** : Ratio Début/Fin = **{viz_ratio_lstm:.2f}**.
                     * Le gradient reste stable. L'information circule librement du passé vers le présent.
-                """
-                    ),
+                """),
                     kind="danger" if viz_ratio_rnn < 1e-3 else "success",
                 ),
             ]
@@ -591,8 +575,7 @@ def _(get_gradient_norms, go, mo, slider_seq):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
             ---
         
             # 3. LSTM : Long Short-Term Memory
@@ -610,15 +593,13 @@ def _(mo):
             | $f_t$ (forget gate) | Controle ce qu'on **oublie** de $C_{t-1}$ |
             | $i_t$ (input gate) | Controle ce qu'on **ajoute** a $C_t$ |
             | $o_t$ (output gate) | Controle ce qu'on **produit** dans $h_t$ |
-            """
-    )
+            """)
     return
 
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
             ## Equations du LSTM avec code PyTorch
         
             ### Etape 1 : Forget Gate - "Que faut-il oublier ?"
@@ -626,8 +607,7 @@ def _(mo):
             $$f_t = \sigma(W_f \cdot [h_{t-1}, x_t] + b_f)$$
         
             Sortie entre 0 (tout oublier) et 1 (tout garder).
-            """
-    )
+            """)
     return
 
 
@@ -661,8 +641,7 @@ def _(mo, torch):
     # === AFFICHAGE ===
 
     # Visualisation des dimensions
-    lstm_dims_info = mo.md(
-        f"""
+    lstm_dims_info = mo.md(f"""
     **Suivi des Dimensions (Shapes) :**
 
     1.  **Inputs séparés** :
@@ -674,8 +653,7 @@ def _(mo, torch):
     
     3.  **Vecteur Forget Gate (`lstm_f_t`)** :
         * Résultat : `{tuple(lstm_f_t.shape)}`
-    """
-    )
+    """)
 
     # Interprétation des valeurs
     lstm_vals = lstm_f_t[0].detach().numpy()
@@ -700,8 +678,7 @@ def _(mo, torch):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
             ### Etape 2 : Input Gate - "Quelles nouvelles infos stocker ?"
         
             $$i_t = \sigma(W_i \cdot [h_{t-1}, x_t] + b_i)$$
@@ -710,8 +687,7 @@ def _(mo):
         
             - $i_t$ : quelles dimensions mettre a jour (0 ou 1)
             - $\tilde{C}_t$ : candidates pour la mise a jour (entre -1 et 1)
-            """
-    )
+            """)
     return
 
 
@@ -768,15 +744,13 @@ def _(lstm_combined, lstm_hidden_sz, lstm_input_sz, mo, torch):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
             ### Etape 3 : Mise a jour de l'etat de cellule
         
             $$\boxed{C_t = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t}$$
         
             C'est **LA** formule cle ! Le gradient peut circuler directement via $C_{t-1} \to C_t$.
-            """
-    )
+            """)
     return
 
 
@@ -828,15 +802,13 @@ def _(lstm_C_tilde, lstm_f_t, lstm_hidden_sz, lstm_i_t, mo, torch):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
             ### Etape 4 : Output Gate - "Que produire en sortie ?"
         
             $$o_t = \sigma(W_o \cdot [h_{t-1}, x_t] + b_o)$$
         
             $$h_t = o_t \odot \tanh(C_t)$$
-            """
-    )
+            """)
     return
 
 
@@ -888,16 +860,13 @@ def _(lstm_C_t_1, lstm_combined, lstm_hidden_sz, lstm_input_sz, mo, torch):
         [
             mo.md("### 🗣️ Output Gate : Le Porte-Parole"),
             mo.md(r"$$h_t = o_t \odot \tanh(C_t)$$"),
-            mo.md(
-                """
+            mo.md("""
                             La **Cell State ($C_t$)** contient *tout* l'historique (compteurs, parenthèses ouvertes, contexte lointain).
                             L'**Output Gate ($o_t$)** décide quelle partie est utile *immédiatement*.
-                            """
-            ),
+                            """),
             mo.callout(mo.md("\n".join(output_lines)), kind="info"),
             mo.md("### 📏 Bilan des Dimensions Finales"),
-            mo.md(
-                f"""
+            mo.md(f"""
         * **Porte ($o_t$)** : `{tuple(lstm_o_t.shape)}`
         * **Mémoire normalisée ($\tanh(C_t)$)** : `{tuple(lstm_memory_tanh.shape)}`
         * **État Caché Final ($h_t$)** : `{tuple(lstm_h_t.shape)}`
@@ -905,8 +874,7 @@ def _(lstm_C_t_1, lstm_combined, lstm_hidden_sz, lstm_input_sz, mo, torch):
         Ce vecteur **$h_t$** sera :
         1. La sortie de cette couche pour ce pas de temps.
         2. L'entrée $h_{{t-1}}$ pour le prochain pas de temps.
-        """
-            ),
+        """),
         ]
     )
     return
@@ -914,13 +882,11 @@ def _(lstm_C_t_1, lstm_combined, lstm_hidden_sz, lstm_input_sz, mo, torch):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
             ## Verification avec `nn.LSTMCell`
         
             Comparons notre implementation manuelle avec PyTorch :
-            """
-    )
+            """)
     return
 
 
@@ -986,8 +952,7 @@ def _(nn, torch):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
             ## 🛣️ Pourquoi le LSTM résout-il le Vanishing Gradient ?
         
             Le secret ne réside pas dans la complexité, mais dans une opération arithmétique simple : **l'Addition**.
@@ -1012,18 +977,15 @@ def _(mo):
             * Si la porte d'oubli est ouverte (**$f_t \approx 1$**), le gradient est multiplié par 1.
             * Il peut donc traverser 100 pas de temps sans être modifié ni écrasé.
             * C'est ce qu'on appelle la **Constant Error Carousel** ou l'**Autoroute du Gradient**.
-            """
-    )
+            """)
     return
 
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
             ## Visualisation interactive des portes LSTM
-            """
-    )
+            """)
     return
 
 
@@ -1228,8 +1190,7 @@ def _(
         return mo.vstack(
             [
                 mo.callout(
-                    mo.md(
-                        f"""
+                    mo.md(f"""
             **Guide des Couleurs (Palette Accessible Okabe-Ito) :**
         
             * **Graphique 1 (Portes)** :
@@ -1240,8 +1201,7 @@ def _(
             * **Graphique 3 (Normes)** :
                 * <span style="color:{CB_COLORS['c_norm']}">■</span> **Orange (Ligne épaisse)** : Mémoire Long Terme ($C_t$).
                 * <span style="color:{CB_COLORS['h_norm']}">■</span> **Bleu Foncé (Ligne fine)** : Mémoire Court Terme ($h_t$).
-            """
-                    ),
+            """),
                     kind="info",
                 ),
                 mo.ui.plotly(fig),
@@ -1254,8 +1214,7 @@ def _(
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
             ---
         
             # 4. GRU : Alternative simplifiee
@@ -1277,8 +1236,7 @@ def _(mo):
             $$\tilde{h}_t = \tanh(W \cdot [r_t \odot h_{t-1}, x_t])$$
         
             $$\boxed{h_t = (1 - z_t) \odot h_{t-1} + z_t \odot \tilde{h}_t}$$
-            """
-    )
+            """)
     return
 
 
@@ -1319,8 +1277,7 @@ def _(nn, torch):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
             ## Comparatif RNN vs LSTM vs GRU
         
             | Aspect | RNN | LSTM | GRU |
@@ -1330,15 +1287,13 @@ def _(mo):
             | **Parametres** | $O(h^2)$ | $O(4h^2)$ | $O(3h^2)$ |
             | **Vanishing gradient** | Problematique | Resolu | Resolu |
             | **Cas d'usage** | Sequences courtes | NLP, longues deps | Compromis perf/vitesse |
-            """
-    )
+            """)
     return
 
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
             ---
         
             # 5. Application : Classification de Sentiments
@@ -1348,8 +1303,7 @@ def _(mo):
             ```
             Texte -> Tokenization -> Embedding -> LSTM -> Linear -> Prediction
             ```
-            """
-    )
+            """)
     return
 
 
@@ -1434,11 +1388,9 @@ def _(allocine, allocine_test, data_utils, tokenize, torch, word2idx):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
             ### Modele LSTM pour la classification
-            """
-    )
+            """)
     return
 
 
@@ -1495,11 +1447,9 @@ def _(nn, torch):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
             ### Configuration de l'entrainement
-            """
-    )
+            """)
     return
 
 
@@ -1572,11 +1522,9 @@ def _(
         test_dataset, batch_size=int(batch_size_select.value), shuffle=False
     )
 
-    mo.md(
-        f"""
+    mo.md(f"""
     **Modele**: {"Bi-" if bidirectional_checkbox.value else ""}LSTM | **Params**: {total_params:,}
-    """
-    )
+    """)
     return sentiment_model, test_loader, train_loader
 
 
@@ -1688,11 +1636,9 @@ def _(
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
             ### Testez le modele !
-            """
-    )
+            """)
     return
 
 
@@ -1734,8 +1680,7 @@ def _(
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
             ---
         
             # Resume
@@ -1752,8 +1697,7 @@ def _(mo):
             - **Attention** : permet de "regarder" differentes parties de la sequence
             - **Transformer** : remplace les RNN dans beaucoup d'applications modernes
             - **BERT, GPT** : modeles pre-entraines bases sur Transformers
-            """
-    )
+            """)
     return
 
 

@@ -20,18 +20,15 @@ def _(mo):
 
     mo.vstack(
         [
-            mo.md(
-                r"""
+            mo.md(r"""
                         # Word Embedding (Représentation vectorielle des mots)
                     
                         **Word Embedding** est une représentation des mots qui permet à des mots ayant un sens similaire d'avoir une représentation semblable. Il s'agit d'une méthode d'apprentissage non supervisé sur un vaste corpus textuel, où le modèle apprend à prédire un mot à partir de son contexte ou inversement. Une fois entraîné, cette méthode produit des représentations vectorielles où des mots proches dans cet espace à haute dimension sont censés être sémantiquement similaires.
                     
                         Contrairement à une simple assignation de vecteurs uniques par mot, les embeddings capturent des similarités **sémantiques** ou **syntaxiques** basées sur le corpus d'entraînement. Les vecteurs d'embedding contiennent souvent des centaines de dimensions et identifient des relations nuancées entre les mots.
-                            """
-            ),
+                            """),
             mo.image(src=_asset_dir / "word_embed.png"),
-            mo.md(
-                r"""
+            mo.md(r"""
                         ---
                     
                         ## Couche d'Embedding (Embedding Layer)
@@ -49,8 +46,7 @@ def _(mo):
                         ### Utilisation basique
                     
                         La couche d'embedding agit uniquement comme une **table de correspondance**. Chaque index est associé à un vecteur dense qui peut être mis à jour lors de l'entraînement.
-                            """
-            ),
+                            """),
         ]
     )
     return
@@ -98,48 +94,40 @@ def _(embedding_dim_slider, mo, nn, torch, word_selector):
     # Récupération de l'embedding correspondant au mot sélectionné
     selected_embed = embeds(lookup_tensor)
 
-    mo.md(
-        f"""
+    mo.md(f"""
     **Configuration actuelle:**
     - Mot sélectionné: `{word_selector.value}` (index: {word_to_ix[word_selector.value]})
     - Dimension de l'embedding: {embedding_dim_slider.value}
     - Vecteur d'embedding: `{selected_embed.detach().numpy()}`
-    """
-    )
+    """)
     return (embeds,)
 
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
             Paramètres d'entrainements
-            """
-    )
+            """)
     return
 
 
 @app.cell
 def _(embeds, mo):
     params_list = [str(param.data) for param in embeds.parameters()]
-    mo.md(
-        f"""
+    mo.md(f"""
     **Paramètres d'entraînement (matrice d'embedding):**
     ```
     {params_list[0]}
     ```
-    """
-    )
+    """)
     return
 
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
             Juste pour le fun on définie nos propres paramètres
-            """
-    )
+            """)
     return
 
 
@@ -163,11 +151,9 @@ def _(nn, torch):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
             Comme vous pouvez le constater, si je sélectionne l'index 0 ou 1, j'obtiens ma ligne embedding_lookup
-            """
-    )
+            """)
     return
 
 
@@ -180,13 +166,11 @@ def _(embeds_custom, torch):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
             ## GPT embedding
         
             Regardons le tout premier modèle GPT et voyons la taille de la couche d'embedding.
-            """
-    )
+            """)
     return
 
 
@@ -211,24 +195,20 @@ def _():
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
             [Regardont le code de ce GPT](https://github.com/huggingface/transformers/blob/v4.25.1/src/transformers/models/gpt2/modeling_gpt2.py#L667)
-            """
-    )
+            """)
     return
 
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
             ## Entraîner la première couche d'embedding
         
             Dans cette section, nous allons entraîner notre première couche d'embedding sur des critiques de films en français (dataset Allociné) !
             Pour commencer, nous entraînerons uniquement cette couche sur les lettres composant les mots.
-            """
-    )
+            """)
     return
 
 
@@ -261,8 +241,7 @@ def _(allocine_dataset):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
             Maintenant, nous allons créer une séquence de lettres basée sur des phrases.
             Par exemple :
         
@@ -288,8 +267,7 @@ def _(mo):
               (' ', 'a'),
             ]
             ```
-            """
-    )
+            """)
     return
 
 
@@ -325,8 +303,7 @@ def _(reviews):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
             Maintenant, effectuons un encodage one-hot de manière à ce qu'une lettre corresponde à un identifiant (comme un identifiant dans une table SQL).
         
             ```
@@ -348,8 +325,7 @@ def _(mo):
              'u': 13,
              'y': 14}
             ```
-            """
-    )
+            """)
     return
 
 
@@ -370,8 +346,7 @@ def _(np, pd, window):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
             ### La classe Dataset
         
             La classe `Dataset` résume les fonctionnalités de base d'un jeu de données de manière naturelle.
@@ -381,8 +356,7 @@ def _(mo):
             2. **`__len__`** : Cette fonction retourne la taille totale du jeu de données.
         
             Ces deux fonctions garantissent une structure cohérente et standardisée pour interagir avec vos données.
-            """
-    )
+            """)
     return
 
 
@@ -426,12 +400,10 @@ def _(mo):
 
     mo.vstack(
         [
-            mo.md(
-                r"""
+            mo.md(r"""
                         ## Construire le premier modèle d'embedding
                         Nous allons construire un réseau simple pour prédire la lettre suivante.
-                            """
-            ),
+                            """),
             mo.image(src=_asset_path / "next_letter_prediction.png"),
         ]
     )
@@ -456,12 +428,10 @@ def _(F, torch):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
             ### Visualisation des lettres avant l'entraînement
             Visualisons les embeddings des lettres avant l'entraînement du modèle.
-            """
-    )
+            """)
     return
 
 
@@ -470,13 +440,11 @@ def _(NextLetterPrediction, embedding_size_model, mapping, mo):
     model = NextLetterPrediction(
         vocab_size=len(mapping), embedding_size=embedding_size_model.value
     )
-    mo.md(
-        f"""
+    mo.md(f"""
     **Modèle créé avec:**
     - Taille du vocabulaire: {len(mapping)}
     - Dimension de l'embedding: {embedding_size_model.value}
-    """
-    )
+    """)
     return (model,)
 
 
@@ -517,13 +485,11 @@ def _(go, mapping, model, np, torch):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
             ### Train loop
         
             Configurez les hyperparamètres d'entraînement ci-dessous:
-            """
-    )
+            """)
     return
 
 
@@ -639,14 +605,12 @@ def _(
         # Enregistrer la perte moyenne par époque
         loss_history.append(epoch_loss / n_batches)
 
-    mo.md(
-        f"""
+    mo.md(f"""
     **Entraînement terminé!**
     - Device: `{device}`
     - Époques: {epochs_slider.value}
     - Perte finale: {loss_history[-1]:.4f}
-    """
-    )
+    """)
     return device, loss_history, model_train
 
 
@@ -716,13 +680,11 @@ def _(device, go, mapping, mo, model_train, np, torch):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
             ## Comparaison sémantique avec CamemBERT
         
             Utilisez les champs ci-dessous pour comparer la similarité sémantique entre deux mots français.
-            """
-    )
+            """)
     return
 
 
@@ -775,8 +737,7 @@ def _(F, mo, torch, word1_input, word2_input):
     else:
         interpretation = "Peu similaires"
 
-    mo.md(
-        f"""
+    mo.md(f"""
     ### Résultat de la comparaison
 
     | Mot 1 | Mot 2 | Similarité cosinus | Interprétation |
@@ -784,8 +745,7 @@ def _(F, mo, torch, word1_input, word2_input):
     | **{word1}** | **{word2}** | **{sim_value:.4f}** | {interpretation} |
 
     > **Conseil:** Essayez des paires comme "chat/chien", "paris/france", "heureux/triste", "manger/boire"
-    """
-    )
+    """)
     return
 
 

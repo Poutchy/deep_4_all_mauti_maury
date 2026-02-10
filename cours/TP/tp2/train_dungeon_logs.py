@@ -280,11 +280,16 @@ def main(args):
     # Scheduler (optionnel)
     scheduler = None
     if args.use_scheduler:
-        scheduler1 = optim.lr_scheduler.ConstantLR(optimizer, factor=0.1, total_iters=20)
+        scheduler1 = optim.lr_scheduler.ConstantLR(
+            optimizer, factor=0.1, total_iters=20
+        )
         scheduler2 = optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
         # scheduler = optim.lr_scheduler.ChainedScheduler([scheduler1, scheduler2], optimizer=optimizer)
         scheduler = optim.lr_scheduler.ReduceLROnPlateau(
-            optimizer, mode="max", factor=0.5, patience=5
+            optimizer,
+            mode="max",
+            factor=0.5,
+            patience=5,
             # optimizer, mode="max", factor=0.5, patience=5, verbose=True
         )
 
